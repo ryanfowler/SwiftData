@@ -380,7 +380,7 @@ public struct SwiftData {
     
     :param: obj  The identifier to be escaped. NOTE: This object must be of type String.
     
-    :returns:    The escaped identifier as a String, ready to be inserted into a SQL statement. Note: Double quotes (") will be placed around the entire indentifier.
+    :returns:    The escaped identifier as a String, ready to be inserted into a SQL statement. Note: Double quotes (") will be placed around the entire identifier.
     */
     public static func escapeIdentifier(obj: String) -> String {
         
@@ -557,7 +557,7 @@ public struct SwiftData {
     /**
     Obtain the last inserted row id
 
-    Note: Care should be taken when the database is being accessed from multiple threads. The value could possibily return the last inserted row ID for another operation if another thread executes after your intended operation but before this function call.
+    Note: Care should be taken when the database is being accessed from multiple threads. The value could possibly return the last inserted row ID for another operation if another thread executes after your intended operation but before this function call.
 
     Possible errors returned by this function are:
 
@@ -603,7 +603,7 @@ public struct SwiftData {
     /**
     Obtain the number of rows modified by the most recently completed SQLite statement (INSERT, UPDATE, or DELETE)
 
-    Note: Care should be taken when the database is being accessed from multiple threads. The value could possibily return the number of rows modified for another operation if another thread executes after your intended operation but before this function call.
+    Note: Care should be taken when the database is being accessed from multiple threads. The value could possibly return the number of rows modified for another operation if another thread executes after your intended operation but before this function call.
 
     Possible errors returned by this function are:
 
