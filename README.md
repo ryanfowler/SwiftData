@@ -21,11 +21,16 @@ SwiftData is an simple and effective wrapper around the SQLite3 C api written co
 Currently, it's as easy as dragging the file 'SwiftData.swift' into your project.
 Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added '#import "sqlite3.h"' to your Briding-Header.h file.
 
+##Requirements
+
+- Xcode 6
+- iOS 7.0+
+
 ##Usage
 
 This section runs through some sample usage of SwiftData.
 
-The full API documentation can be found [here](http://www.google.com)
+The full API documentation can be found [here](http://ryanfowler.github.io/SwiftData)
 
 ####Table Creation
 
@@ -183,7 +188,7 @@ if let name = row["Name"].asString() {
     //the value for column "Name" exists as a String
 } else
 
-    //the value is nil, is not a String, or the column requested does not exist
+    //the value is nil, cannot be cast as a String, or the column requested does not exist
 }
 ```
 
@@ -252,13 +257,35 @@ All operations that occur within the provided closure are executed on the single
 =================
 ###Transactions and Savepoints
 
+If we wanted to execute the above closure (task: ()->Void) inside an exclusive transaction, it could be done like so:
 
+```
+if let err = transaction(task) {
+    //there was an error starting, closing, committing, or rolling back the transaction as per the error code
+} else {
+    //the transaction was executed without errors
+}
+```
+
+Similarly, a savepoint could be executed like so:
+
+```
+if let err = savepoint(task) {
+    //there was an error starting, closing, releasing, or rolling back the savepoint as per the error code
+} else {
+    //the savepoint was executed without errors
+}
+```
+
+It should be noted that transactions *cannot* be embedded into another transaction or savepoint.
+
+However, savepoints may be embedded into other savepoints or transactions.
 
 
 =================
 ###API Documentation
 
-Full API Documentation can be found [here](http://www.google.com)
+Full API Documentation can be found [here](http://ryanfowler.github.io/SwiftData)
 
 
 ##Contact
