@@ -63,7 +63,7 @@ public struct SwiftData {
                 return
             }
         
-            //execute the update statement
+            //execute the change statement
             error = SQLiteDB.sharedInstance.executeChange(sqlStr)
         
             //close database connection
@@ -120,7 +120,7 @@ public struct SwiftData {
                 return
             }
         
-            //execute the query statement
+            //execute the change statement
             error = SQLiteDB.sharedInstance.executeChange(sqlStr, withArgs: withArgs)
         
             //close database connection
@@ -167,7 +167,7 @@ public struct SwiftData {
                 return
             }
         
-            //execute the query statement
+            //execute the change statements
             for sqlStr in sqlArr {
                 if let err = SQLiteDB.sharedInstance.executeChange(sqlStr) {
                     SQLiteDB.sharedInstance.close()
@@ -406,7 +406,7 @@ public struct SwiftData {
     */
     public static func createTable(table: String, withColumnNamesAndTypes values: [String: SwiftData.DataType]) -> Int? {
         
-        //create the success variable
+        //create the error variable
         var error: Int? = nil
 
         //create task closure
@@ -451,7 +451,7 @@ public struct SwiftData {
     */
     public static func deleteTable(table: String) -> Int? {
         
-        //create the success variable
+        //create the error variable
         var error: Int? = nil
 
         //create task closure
@@ -666,7 +666,7 @@ public struct SwiftData {
     */
     public static func createIndex(#name: String, onColumns: [String], inTable: String, isUnique: Bool = false) -> Int? {
         
-        //create the success variable
+        //create the error variable
         var error: Int? = nil
 
         //create task closure
@@ -977,7 +977,7 @@ public struct SwiftData {
     
     private class SQLiteDB {
         
-        //create a single instance of SwiftDB
+        //create a single instance of SQLiteDB
         class var sharedInstance: SQLiteDB {
             struct Singleton {
                 static let instance = SQLiteDB()
