@@ -3,7 +3,7 @@ SwiftData
 
 C api's are a pain in Swift - that's where SwiftData comes in.
 
-SwiftData is an simple and effective wrapper around the SQLite3 C api written completely in Swift.
+SwiftData is a simple and effective wrapper around the SQLite3 C api written completely in Swift.
 
 ##Features
 
@@ -59,7 +59,7 @@ Note that by default, error and warning messages are printed to the console. If 
 `let errMsg = SD.errorMessageFromCode(err)`
 
 =================
-####Row Changes
+####Execute Change
 
 Now that we've created our Table, "Cities", we can insert a row into it:
 
@@ -132,7 +132,7 @@ You may escape an identifier string yourself using the function:
 Objects provided to bind as identifiers must be of type String.
 
 ====================
-###Query
+###Execute Query
 
 Now that our table has some data, we can query it:
 
@@ -195,7 +195,7 @@ if let name = row["Name"].asString() {
 You may also execute a query using object binding, similar to the insert example above:
 
 ```
-let (resultSet, err) = SD.executeQuery("SELECT * FROM Cities WHERE name = ?", withArgs: ["Toronto"])
+let (resultSet, err) = SD.executeQuery("SELECT * FROM Cities WHERE Name = ?", withArgs: ["Toronto"])
 if err != nil {
     //there was an error during the query, handle it here
 } else {
