@@ -59,7 +59,7 @@ Note that by default, error and warning messages are printed to the console. If 
 `let errMsg = SD.errorMessageFromCode(err)`
 
 =================
-####Row Insert
+####Row Changes
 
 Now that we've created our Table, "Cities", we can insert a row into it:
 
