@@ -31,10 +31,392 @@
     <!-- MAIN CONTENT -->
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
-        <h3>
-<a name="swiftdata-api-documentation" class="anchor" href="#swiftdata-api-documentation"><span class="octicon octicon-link"></span></a>SwiftData API Documentation</h3>
+        <h2>
+<a name="swiftdata-api-documentation" class="anchor" href="#swiftdata-api-documentation"><span class="octicon octicon-link"></span></a>SwiftData API Documentation</h2>
 
-<p>API documentation here.</p>
+<h3>
+<a name="public-functions" class="anchor" href="#public-functions"><span class="octicon octicon-link"></span></a>Public Functions</h3>
+
+<h4>
+<a name="public-static-func-executechangesqlstr-string---int" class="anchor" href="#public-static-func-executechangesqlstr-string---int"><span class="octicon octicon-link"></span></a>public static func executeChange(sqlStr: String) -&gt; Int?</h4>
+
+<p>Execute a non-query SQL statement (e.g. INSERT, UPDATE, DELETE, etc.)</p>
+
+<p>This function will execute the provided SQL and return an Int with the error code, or nil if there was no error.
+It is recommended to always verify that the return value is nil to ensure that the operation was successful.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>sqlStr  -&gt; The non-query string of SQL to be executed (INSERT, UPDATE, DELETE, etc.)</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-executechangesqlstr-string-withargs-anyobject---int" class="anchor" href="#public-static-func-executechangesqlstr-string-withargs-anyobject---int"><span class="octicon octicon-link"></span></a>public static func executeChange(sqlStr: String, withArgs: [AnyObject?]) -&gt; Int?</h4>
+
+<p>Execute a non-query SQL statement (e.g. INSERT, UPDATE, DELETE, etc.) along with arguments to be bound to the characters "?" (for values) and "i?" (for identifiers e.g. table or column names).</p>
+
+<p>The objects in the provided array of arguments will be bound, in order, to the "i?" and "?" characters in the SQL string. 
+The quantity of "i?"s and "?"s in the SQL string must be equal to the quantity of arguments provided.
+Objects that are to bind as an identifier ("i?") must be of type String. 
+Identifiers should be bound and escaped if provided by the user.
+If "nil" is provided as an argument, the NULL value will be bound to the appropriate value in the SQL string.
+For more information on how the objects will be escaped, refer to the functions "escapeValue()" and "escapeIdentifier()".
+Note that the "escapeValue()" and "escapeIdentifier()" include the necessary quotations ' ' or " " to the arguments when being bound to the SQL.</p>
+
+<p>It is recommended to always verify that the return value is nil to ensure that the operation was successful.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>binding errors (201 - 203)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>sqlStr  -&gt; The non-query string of SQL to be executed (INSERT, UPDATE, DELETE, etc.)</li>
+<li>withArgs  -&gt; An array of objects to bind to the "?" and "i?" characters in the sqlStr</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-executemultiplechangessqlarr-string---int" class="anchor" href="#public-static-func-executemultiplechangessqlarr-string---int"><span class="octicon octicon-link"></span></a>public static func executeMultipleChanges(sqlArr: [String]) -&gt; Int?</h4>
+
+<p>Execute multiple SQL statements (non-queries e.g. INSERT, UPDATE, DELETE, etc.)</p>
+
+<p>This function will execute each SQL statment in the provided array, in order, and return an Int with the error code, or nil if there was no error.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>sqlArr  -&gt; An array of non-query strings of SQL to be executed (INSERT, UPDATE, DELETE, etc.)</li>
+</ul><p>Returns:       </p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-executequerysqlstr-string---result-sdrow-error-int" class="anchor" href="#public-static-func-executequerysqlstr-string---result-sdrow-error-int"><span class="octicon octicon-link"></span></a>public static func executeQuery(sqlStr: String) -&gt; (result: [SDRow], error: Int?)</h4>
+
+<p>Execute a SQLite query statement (e.g. SELECT)</p>
+
+<p>This function will execute the provided SQL and return a tuple of:</p>
+
+<ul>
+<li>an Array of SDRow objects</li>
+<li>an Int with the error code, or nil if there was no error</li>
+</ul><p>The value for each column in an SDRow can be obtained using the column name in the subscript format similar to a Dictionary, along with the function to obtain the value in the appropriate type (.asString(), .asDate(), .asData(), .asInt(), .asDouble(), and .asBool()).
+Without the function call to return a specific type, the SDRow will return an object with type AnyObject.
+Note: NULL values in the SQLite database will be returned as 'nil'.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>sqlStr  -&gt; The query String of SQL to be executed (e.g. SELECT)</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>A tuple containing an Array of "SDRow"s, and an Int with the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-executequerysqlstr-string-withargs-anyobject---result-sdrow-error-int" class="anchor" href="#public-static-func-executequerysqlstr-string-withargs-anyobject---result-sdrow-error-int"><span class="octicon octicon-link"></span></a>public static func executeQuery(sqlStr: String, withArgs: [AnyObject?]) -&gt; (result: [SDRow], error: Int?)</h4>
+
+<p>Execute a SQL query statement (e.g. SELECT) with arguments to be bound to the characters "?" (for values) and "i?" (for identifiers e.g. table or column names).</p>
+
+<p>See the "executeChange(sqlStr: String, withArgs: [AnyObject?])" function for more information on the arguments provided and binding.</p>
+
+<p>See the "executeQuery(sqlStr: String)"  function for more information on the return value.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>binding errors (201 - 203)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>sqlStr  -&gt; The query String of SQL to be executed (e.g. SELECT)</li>
+<li>withArgs  -&gt; An array of objects that will be bound, in order, to the characters "?" (for values) and "i?" (for identifiers, e.g. table or column names) in the sqlStr.</li>
+</ul><p>Returns:      </p>
+
+<ul>
+<li>A tuple containing an Array of "SDRow"s, and an Int with the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-executewithconnectionflags-sdflags-closure--void---int" class="anchor" href="#public-static-func-executewithconnectionflags-sdflags-closure--void---int"><span class="octicon octicon-link"></span></a>public static func executeWithConnection(flags: SD.Flags, closure: ()-&gt;Void) -&gt; Int?</h4>
+
+<p>Execute functions in a closure on a single custom connection</p>
+
+<p>Note: This function cannot be nested within itself, or inside a transaction/savepoint.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>custom connection errors (301 - 306)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>flags  -&gt; The custom flag associated with the connection. Can be one of .readOnly, .readWrite, or .readWriteCreate</li>
+<li>closure  -&gt; A closure containing functions that will be executed on the custom connection</li>
+</ul><p>Returns:    </p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-escapevalueobj-anyobject---string" class="anchor" href="#public-static-func-escapevalueobj-anyobject---string"><span class="octicon octicon-link"></span></a>public static func escapeValue(obj: AnyObject?) -&gt; String</h4>
+
+<p>Escape an object to be inserted into a SQLite statement as a value</p>
+
+<p>NOTE: Supported object types are: String, Int, Double, Bool, NSData, NSDate, and nil. All other data types will return the String value "NULL", and a warning message will be printed.</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>obj  -&gt; The value to be escaped</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>The escaped value as a String, ready to be inserted into a SQL statement. Note: Single quotes (') will be placed around the entire value, if necessary.</li>
+</ul><h4>
+<a name="public-static-func-escapeidentifierobj-string---string" class="anchor" href="#public-static-func-escapeidentifierobj-string---string"><span class="octicon octicon-link"></span></a>public static func escapeIdentifier(obj: String) -&gt; String</h4>
+
+<p>Escape a string to be inserted into a SQLite statement as an indentifier (e.g. table or column name)</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>obj  -&gt; The identifier to be escaped. NOTE: This object must be of type String.</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>The escaped identifier as a String, ready to be inserted into a SQL statement. Note: Double quotes (") will be placed around the entire identifier.</li>
+</ul><h4>
+<a name="public-static-func-createtabletable-string-withcolumnnamesandtypes-values-string-swiftdatadatatype---int" class="anchor" href="#public-static-func-createtabletable-string-withcolumnnamesandtypes-values-string-swiftdatadatatype---int"><span class="octicon octicon-link"></span></a>public static func createTable(table: String, withColumnNamesAndTypes values: [String: SwiftData.DataType]) -&gt; Int?</h4>
+
+<p>Create A Table With The Provided Column Names and Types</p>
+
+<p>Note: The ID field is created automatically as "INTEGER PRIMARY KEY AUTOINCREMENT"</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameter:</p>
+
+<ul>
+<li>table  -&gt; The table name to be created</li>
+<li>columnNamesAndTypes  -&gt; A dictionary where the key = column name, and the value = data type</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-deletetabletable-string---int" class="anchor" href="#public-static-func-deletetabletable-string---int"><span class="octicon octicon-link"></span></a>public static func deleteTable(table: String) -&gt; Int?</h4>
+
+<p>Delete a SQLite table by name</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>table  -&gt; The table name to be deleted</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-existingtables---result-string-error-int" class="anchor" href="#public-static-func-existingtables---result-string-error-int"><span class="octicon octicon-link"></span></a>public static func existingTables() -&gt; (result: [String], error: Int?)</h4>
+
+<p>Obtain a list of the existing SQLite table names</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>Table query error (403)</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>A tuple containing an Array of all existing SQLite table names, and an Int with the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-errormessageforcodecode-int---string" class="anchor" href="#public-static-func-errormessageforcodecode-int---string"><span class="octicon octicon-link"></span></a>public static func errorMessageForCode(code: Int) -&gt; String</h4>
+
+<p>Obtain the error message relating to the provided error code</p>
+
+<p>Parameters:</p>
+
+<ul>
+<li>code  -&gt; The error code provided</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>The error message relating to the provided error code</li>
+</ul><h4>
+<a name="public-static-func-databasepath---string" class="anchor" href="#public-static-func-databasepath---string"><span class="octicon octicon-link"></span></a>public static func databasePath() -&gt; String</h4>
+
+<p>Obtain the database path</p>
+
+<p>Returns:  </p>
+
+<ul>
+<li>The path to the SwiftData database</li>
+</ul><h4>
+<a name="public-static-func-lastinsertedrowid---rowid-int-error-int" class="anchor" href="#public-static-func-lastinsertedrowid---rowid-int-error-int"><span class="octicon octicon-link"></span></a>public static func lastInsertedRowID() -&gt; (rowID: Int, error: Int?)</h4>
+
+<p>Obtain the last inserted row id</p>
+
+<p>Note: Care should be taken when the database is being accessed from multiple threads. The value could possibly return the last inserted row ID for another operation if another thread executes after your intended operation but before this function call.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>A tuple of he ID of the last successfully inserted row's, and an Int of the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-numberofrowsmodified---rowid-int-error-int" class="anchor" href="#public-static-func-numberofrowsmodified---rowid-int-error-int"><span class="octicon octicon-link"></span></a>public static func numberOfRowsModified() -&gt; (rowID: Int, error: Int?)</h4>
+
+<p>Obtain the number of rows modified by the most recently completed SQLite statement (INSERT, UPDATE, or DELETE)</p>
+
+<p>Note: Care should be taken when the database is being accessed from multiple threads. The value could possibly return the number of rows modified for another operation if another thread executes after your intended operation but before this function call.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>A tuple of the number of rows modified by the most recently completed SQLite statement, and an Int with the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-createindexname-string-oncolumns-string-intable-string-isunique-bool--false---int" class="anchor" href="#public-static-func-createindexname-string-oncolumns-string-intable-string-isunique-bool--false---int"><span class="octicon octicon-link"></span></a>public static func createIndex(#name: String, onColumns: [String], inTable: String, isUnique: Bool = false) -&gt; Int?</h4>
+
+<p>Create a SQLite index on the specified table and column(s)</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>Index error (401)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>name  -&gt; The index name that is being created</li>
+<li>onColumns  -&gt; An array of column names that the index will be applied to (must be one column or greater)</li>
+<li>inTable  -&gt; The table name where the index is being created</li>
+<li>isUnique  -&gt; True if the index should be unique, false if it should not be unique (defaults to false)</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-removeindexindexname-string---int" class="anchor" href="#public-static-func-removeindexindexname-string---int"><span class="octicon octicon-link"></span></a>public static func removeIndex(indexName: String) -&gt; Int?</h4>
+
+<p>Remove a SQLite index by its name</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>indexName  -&gt; The name of the index to be removed</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-existingindexes---result-string-error-int" class="anchor" href="#public-static-func-existingindexes---result-string-error-int"><span class="octicon octicon-link"></span></a>public static func existingIndexes() -&gt; (result: [String], error: Int?)</h4>
+
+<p>Obtain a list of all existing indexes</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>Index error (402)</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>A tuple containing an Array of all existing index names on the SQLite database, and an Int with the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-existingindexesfortabletable-string---result-string-error-int" class="anchor" href="#public-static-func-existingindexesfortabletable-string---result-string-error-int"><span class="octicon octicon-link"></span></a>public static func existingIndexesForTable(table: String) -&gt; (result: [String], error: Int?)</h4>
+
+<p>Obtain a list of all existing indexes on a specific table</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>Index error (402)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>table  -&gt; The name of the table that is being queried for indexes</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>A tuple containing an Array of all existing index names in the table, and an Int with the error code or nil if there was no error</li>
+</ul><h4>
+<a name="public-static-func-transactiontransactionclosure--bool---int" class="anchor" href="#public-static-func-transactiontransactionclosure--bool---int"><span class="octicon octicon-link"></span></a>public static func transaction(transactionClosure: ()-&gt;Bool) -&gt; Int?</h4>
+
+<p>Execute commands within a single exclusive transaction</p>
+
+<p>A connection to the database is opened and is not closed until the end of the transaction. A transaction cannot be embedded into another transaction or savepoint.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+<li>Transaction errors (501 - 502)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>transactionClosure  -&gt; A closure containing commands that will execute as part of a single transaction. If the transactionClosure returns true, the changes made within the closure will be committed. If false, the changes will be rolled back and will not be saved.</li>
+</ul><p>Returns:</p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error committing or rolling back the transaction</li>
+</ul><h4>
+<a name="public-static-func-savepointsavepointclosure--bool---int" class="anchor" href="#public-static-func-savepointsavepointclosure--bool---int"><span class="octicon octicon-link"></span></a>public static func savepoint(savepointClosure: ()-&gt;Bool) -&gt; Int?</h4>
+
+<p>Execute commands within a single savepoint</p>
+
+<p>A connection to the database is opened and is not closed until the end of the savepoint (or the end of the last savepoint, if embedded).</p>
+
+<p>NOTE: Unlike transactions, savepoints may be embedded into other savepoints or transactions.</p>
+
+<p>Possible errors returned by this function are:</p>
+
+<ul>
+<li>SQLite errors (0 - 101)</li>
+</ul><p>Parameters:</p>
+
+<ul>
+<li>savepointClosure  -&gt; A closure containing commands that will execute as part of a single savepoint. If the savepointClosure returns true, the changes made within the closure will be released. If false, the changes will be rolled back and will not be saved.</li>
+</ul><p>Returns: </p>
+
+<ul>
+<li>An Int with the error code, or nil if there was no error releasing or rolling back the savepoint</li>
+</ul>
       </section>
     </div>
 
