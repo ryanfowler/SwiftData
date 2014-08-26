@@ -238,7 +238,7 @@ let task: ()->Void = {
     }
 }
 
-if let err = SD.executeWithConnection(.readOnly, task) {
+if let err = SD.executeWithConnection(.readWrite, task) {
     //there was an error opening or closing the custom connection
 } else {
     //no error, the closure was executed
@@ -257,7 +257,7 @@ All operations that occur within the provided closure are executed on the single
 =================
 ###Transactions and Savepoints
 
-If we wanted to execute the above closure (task: ()->Void) inside an exclusive transaction, it could be done like so:
+If we wanted to execute the above closure `task: ()->Void` inside an exclusive transaction, it could be done like so:
 
 ```
 if let err = transaction(task) {
@@ -278,16 +278,17 @@ if let err = savepoint(task) {
 ```
 
 It should be noted that transactions *cannot* be embedded into another transaction or savepoint.
+Unlike transactions, savepoints may be embedded into other savepoints or transactions.
 
-However, savepoints may be embedded into other savepoints or transactions.
+For more information, see the SQLite documentation for [transactions](http://sqlite.org/lang_transaction.html) and [savepoints](http://www.sqlite.org/lang_savepoint.html).
 
 
 =================
 ###Thread Safety
 
-All SwiftData operations are placed on a serial queue and executed in a FIFO order.
+All SwiftData operations are placed on a custom serial queue and executed in a FIFO order.
 
-This means that you can access the SQLite database from multiple threads without the need to worry.
+This means that you can access the SQLite database from multiple threads without the need to worry about causing errors.
 
 
 ##API Documentation
