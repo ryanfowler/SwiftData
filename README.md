@@ -44,7 +44,10 @@ if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .string,
 }
 ```
 
-or a direct SQL statement:
+=================
+###Execute Change
+
+Alternatively, a Table could be created using a direct SQL statement:
 
 ```
 if let err = SD.executeChange("CREATE TABLE Cities (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Population INTEGER, IsWarm BOOLEAN, FoundedIn DATE)") {
@@ -54,12 +57,11 @@ if let err = SD.executeChange("CREATE TABLE Cities (ID INTEGER PRIMARY KEY AUTOI
 }
 ```
 
-Note that by default, error and warning messages are printed to the console. If an error code was returned from either of the above functions, the related error message could be obtained by calling the function:
+The `SD.executeChange(...)` function can be used to execute any non-query SQL statement.
+
+Note that by default, error and warning messages are printed to the console. If an error code is returned from a function call, the related error message can be obtained by calling the function:
 
 `let errMsg = SD.errorMessageFromCode(err)`
-
-=================
-####Execute Change
 
 Now that we've created our Table, "Cities", we can insert a row into it:
 
@@ -73,7 +75,7 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, Fou
 
 #####Binding Values
 
-Or insert a row with object binding:
+Or we can insert a row with object binding:
 
 ```
 //from user input
