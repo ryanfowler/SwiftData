@@ -19,7 +19,7 @@ SwiftData is a simple and effective wrapper around the SQLite3 C api written com
 ##Installation
 
 Currently, it's as easy as dragging the file 'SwiftData.swift' into your project.
-Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added '#import "sqlite3.h"' to your Briding-Header.h file.
+Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added `#import "sqlite3.h"` to your Briding-Header.h file.
 
 ##Requirements
 
@@ -283,7 +283,14 @@ However, savepoints may be embedded into other savepoints or transactions.
 
 
 =================
-###API Documentation
+###Thread Safety
+
+All SwiftData operations are placed on a serial queue and executed in a FIFO order.
+
+This means that you can access the SQLite database from multiple threads without the need to worry.
+
+
+##API Documentation
 
 Full API Documentation can be found [here](http://ryanfowler.github.io/SwiftData)
 
