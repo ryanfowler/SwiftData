@@ -1,15 +1,16 @@
 SwiftData
 =========
 
-C api's are a pain in Swift - that's where SwiftData comes in.
+The SQLite C API is a pain in Swift - that's where SwiftData comes in.
 
-SwiftData is a simple and effective wrapper around the SQLite3 C api written completely in Swift.
+SwiftData is a simple and effective wrapper around the SQLite3 C API written completely in Swift.
 
-**Note:** Like Swift, this is beta software. Expect breaking changes until Swift 1.0 is released.
+**Note:** *Like Swift, this is beta software. Expect breaking changes until Swift 1.0 is released.*
+
 
 ##Features
 
-- Execute direct SQL statements
+- Execute SQL statements directly
 - Bind objects conveniently to a string of SQL
 - Queries return an easy to handle array of data
 - Support for transactions and savepoints
@@ -18,15 +19,24 @@ SwiftData is a simple and effective wrapper around the SQLite3 C api written com
 - Convenience functions for common tasks, including table and index creation/deletion/querying
 - Database connection operations (opening/closing) are automatically handled
 
+
 ##Installation
 
 Currently, it's as easy as adding the file 'SwiftData.swift' as a git submodule, and dragging it into your project.
 Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added `#import "sqlite3.h"` to your Briding-Header.h file.
 
-##Requirements
+
+##System Requirements
+
+Xcode Version:
 
 - Xcode 6
+
+Can be used in applications with operating systems:
+
 - iOS 7.0+
+- Mac OS X 10.9+
+
 
 ##Usage
 
@@ -34,11 +44,12 @@ This section runs through some sample usage of SwiftData.
 
 The full API documentation can be found [here](http://ryanfowler.github.io/SwiftData)
 
-####Table Creation
+
+###Table Creation
 
 By default, SwiftData creates and uses a database called 'SwiftData.sqlite' in the 'Documents' folder of the application.
 
-To create a Table in the database, you may use the convenience function:
+To create a table in the database, you may use the convenience function:
 
 ```
 if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .StringVal, "Population": .IntVal, "IsWarm": .BoolVal, "FoundedIn": .DateVal]) {
@@ -48,10 +59,17 @@ if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .StringV
 }
 ```
 
+Similar convenience functions are provided for: deleting a table `let err = SD.deleteTable("TableName")` and finding all existing tables in the database `let (tables, err) = SD.existingTables()`.
+
+Alternatively, a table could be created using a SQL statement directly, as shown in the 'Execute A Change' section below.
+
+
 =================
 ###Execute A Change
 
-Alternatively, a Table could be created using a direct SQL statement:
+The `SD.executeChange()` function can be used to execute any non-query SQL statement (e.g. INSERT, UPDATE, DELETE, CREATE, etc.).
+
+To create a table using this function, you could use the following:
 
 ```
 if let err = SD.executeChange("CREATE TABLE Cities (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Population INTEGER, IsWarm BOOLEAN, FoundedIn DATE)") {
@@ -61,14 +79,9 @@ if let err = SD.executeChange("CREATE TABLE Cities (ID INTEGER PRIMARY KEY AUTOI
 }
 ```
 
-The `SD.executeChange(...)` function can be used to execute any non-query SQL statement.
+The table created by this function call is the equivalent of the convenience function used in the earlier section.
 
-Note that by default, error and warning messages are printed to the console.
-If an error code is returned from a function call, the related error message can be obtained by calling the function:
-
-`let errMsg = SD.errorMessageFromCode(err)`
-
-Now that we've created our Table, "Cities", we can insert a row into it:
+Now that we've created our table, "Cities", we can insert a row into it like so:
 
 ```
 if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, FoundedIn) VALUES ('Toronto', 2615060, 0, '1793-08-27')") {
@@ -80,7 +93,7 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, Fou
 
 #####Binding Values
 
-Or we can insert a row with object binding:
+Alternatively, we could insert a row with object binding:
 
 ```
 //from user input
@@ -105,7 +118,7 @@ Be aware that although this uses similar syntax to prepared statements, it actua
 to escape objects internally, which you may also use yourself.
 This means that the objects will attempt to bind to *ALL* '?'s in the string of SQL, including those in strings and comments.
 
-Objects are escaped and will bind to a SQL string in the following manner:
+The objects are escaped and will bind to a SQL string in the following manner:
 
 - A String object is escaped and surrounded by single quotes (e.g. 'sample string')
 - An Int object is left untouched (e.g. 10)
@@ -139,6 +152,7 @@ You may escape an identifier string yourself using the function:
 `let escIdentifier = SD.escapeIdentifier(identifier)`
 
 Objects provided to bind as identifiers must be of type String.
+
 
 ====================
 ###Execute A Query
@@ -176,12 +190,9 @@ A query function returns a tuple of:
 - the result set as an Array of SDRow objects
 - the error code as an Optional Int
 
-The error code should always be checked against nil and handled if it exists.
-If there is no error, the result set can be used.
-
-An SDRow contains a number of SDColumn objects.
+An SDRow contains a number of corresponding SDColumn objects.
 The values for each column can be obtained by using the column name in subscript format, much like a Dictionary.
-In order to obtain the column value as the correct type, you may use the convenience functions:
+In order to obtain the column value in the correct data type, you may use the convenience functions:
 
 - asString()
 - asInt()
@@ -190,18 +201,19 @@ In order to obtain the column value as the correct type, you may use the conveni
 - asDate()
 - asData()
 
-So for example, if you want the string value for the column "Name":
+If one of the above functions is not used, the value will be returned with type AnyObject.
+
+For example, if you want the string value for the column "Name":
 
 ```
 if let name = row["Name"].asString() {
     //the value for column "Name" exists as a String
 } else
-
     //the value is nil, cannot be cast as a String, or the column requested does not exist
 }
 ```
 
-You may also execute a query using object binding, similar to the insert example above:
+You may also execute a query using object binding, similar to the row insert example in an earlier section:
 
 ```
 let (resultSet, err) = SD.executeQuery("SELECT * FROM Cities WHERE Name = ?", withArgs: ["Toronto"])
@@ -231,11 +243,42 @@ if err != nil {
 
 The same binding rules apply as described in the earlier Insert example.
 
+
+=================
+###Error Handling
+
+You have probably noticed that almost all SwiftData functions return an 'error' value.
+
+This error value is an Optional Int corresponding to the appropriate error message, which can be obtained by calling the function:
+
+`let errMsg = SD.errorMessageFromCode(err)`
+
+The error value should always be compared with nil to see if there was an error during the operation, or if the operation was executed successfully.
+
+By default, error and warning messages are printed to the console when they are encountered.
+
+
+=================
+###Creating An Index
+
+To create an index, you may use the provided convenience function:
+
+```
+if let err = SD.createIndex("NameIndex", onColumns: ["Name"], inTable: "Cities", isUnique: true) {
+    //there was an error creating the index, handle it here
+} else {
+    //the index was created successfully
+}
+```
+
+Similar convenience functions are provided for: removing an index `let err = removeIndex("IndexName")`, finding all existing indexes `let (indexes, err) = existingIndexes()`, and finding all indexes for a specified table `let (indexes, err) = existingIndexesForTable("TableName")`.
+
+
 =================
 ###Custom Connection
 
-You may create a custom connection and execute a number of functions within a provided closure.
-This can be done like so:
+You may create a custom connection to the database and execute a number of functions within a provided closure.
+An example of this can be seen below:
 
 ```
 let task: ()->Void = {
@@ -254,7 +297,7 @@ if let err = SD.executeWithConnection(.ReadWrite, task) {
 }
 ```
 
-The custom connection flags are:
+The available custom connection flags are:
 
 - .ReadOnly (SQLITE_OPEN_READONLY)
 - .ReadWrite (SQLITE_OPEN_READWRITE)
