@@ -5,6 +5,8 @@ C api's are a pain in Swift - that's where SwiftData comes in.
 
 SwiftData is a simple and effective wrapper around the SQLite3 C api written completely in Swift.
 
+**Note:** Like Swift, this is beta software. Expect breaking changes until Swift 1.0 is released.
+
 ##Features
 
 - Execute direct SQL statements
@@ -18,7 +20,7 @@ SwiftData is a simple and effective wrapper around the SQLite3 C api written com
 
 ##Installation
 
-Currently, it's as easy as dragging the file 'SwiftData.swift' into your project.
+Currently, it's as easy as adding the file 'SwiftData.swift' as a git submodule, and dragging it into your project.
 Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added `#import "sqlite3.h"` to your Briding-Header.h file.
 
 ##Requirements
@@ -34,10 +36,12 @@ The full API documentation can be found [here](http://ryanfowler.github.io/Swift
 
 ####Table Creation
 
-A Table can be created using the convenience function:
+By default, SwiftData creates and uses a database called 'SwiftData.sqlite' in the 'Documents' folder of the application.
+
+To create a Table in the database, you may use the convenience function:
 
 ```
-if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .string, "Population": .int, "IsWarm": .bool, "FoundedIn": .date]) {
+if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .StringVal, "Population": .IntVal, "IsWarm": .BoolVal, "FoundedIn": .DateVal]) {
     //there was an error during this function, handle it here
 } else {
     //no error, the table was created successfully
@@ -45,7 +49,7 @@ if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .string,
 ```
 
 =================
-###Execute Change
+###Execute A Change
 
 Alternatively, a Table could be created using a direct SQL statement:
 
@@ -59,7 +63,8 @@ if let err = SD.executeChange("CREATE TABLE Cities (ID INTEGER PRIMARY KEY AUTOI
 
 The `SD.executeChange(...)` function can be used to execute any non-query SQL statement.
 
-Note that by default, error and warning messages are printed to the console. If an error code is returned from a function call, the related error message can be obtained by calling the function:
+Note that by default, error and warning messages are printed to the console.
+If an error code is returned from a function call, the related error message can be obtained by calling the function:
 
 `let errMsg = SD.errorMessageFromCode(err)`
 
@@ -92,23 +97,25 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, Fou
 ```
 
 The provided objects will be escaped and will bind to the '?' characters (in order) in the string of SQL.
-You may escape objects yourself using the function:
+
+Be aware that although this uses similar syntax to prepared statements, it actually uses the public function:
 
 `let escValue = SD.escapeValue(object)`
 
-The above function will escape the provided object and include single quotes around string values. 'escValue' is ready to be directly inserted into a SQL statement.
+to escape objects internally, which you may also use yourself.
+This means that the objects will attempt to bind to *ALL* '?'s in the string of SQL, including those in strings and comments.
 
-Object types supported to bind as values are:
+Objects are escaped and will bind to a SQL string in the following manner:
 
-- String
-- Int
-- Double
-- Bool
-- NSDate
-- NSData
-- nil
+- A String object is escaped and surrounded by single quotes (e.g. 'sample string')
+- An Int object is left untouched (e.g. 10)
+- A Double object is left untouched (e.g. 10.8)
+- A Bool object is converted to 0 for false, or 1 for true (e.g. 1)
+- An NSDate object is converted to a string with format 'yyyy-MM-dd HH:mm:ss' and surrounded by single quotes (e.g. '2014-08-26 10:30:28')
+- An NSData object is prefaced with an 'X' and converted to a hexadecimal string surrounded by single quotes (e.g. X'1956a76c')
+- nil is converted to a NULL string (e.g. NULL)
 
-All other object types will bind to the SQL string as 'NULL'.
+All other object types will bind to the SQL string as 'NULL', and a warning message will be printed to the console.
 
 #####Binding Identifiers
 
@@ -134,7 +141,7 @@ You may escape an identifier string yourself using the function:
 Objects provided to bind as identifiers must be of type String.
 
 ====================
-###Execute Query
+###Execute A Query
 
 Now that our table has some data, we can query it:
 
@@ -249,9 +256,9 @@ if let err = SD.executeWithConnection(.readWrite, task) {
 
 The custom connection flags are:
 
-- .readOnly (SQLITE_OPEN_READONLY)
-- .readWrite (SQLITE_OPEN_READWRITE)
-- .readWriteCreate (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE)
+- .ReadOnly (SQLITE_OPEN_READONLY)
+- .ReadWrite (SQLITE_OPEN_READWRITE)
+- .ReadWriteCreate (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE)
 
 All operations that occur within the provided closure are executed on the single custom connection.
 
