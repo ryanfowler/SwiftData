@@ -1559,37 +1559,37 @@ extension SwiftData {
     /**
     Column Data Types
     
-    :param:  string  A column with type String, corresponds to SQLite type "TEXT"
-    :param:  int     A column with type Int, corresponds to SQLite type "INTEGER"
-    :param:  double  A column with type Double, corresponds to SQLite type "DOUBLE"
-    :param:  bool    A column with type Bool, corresponds to SQLite type "BOOLEAN"
-    :param:  data    A column with type NSdata, corresponds to SQLite type "BLOB"
-    :param:  date    A column with type NSDate, corresponds to SQLite type "DATE"
+    :param:  StringVal  A column with type String, corresponds to SQLite type "TEXT"
+    :param:  IntVal     A column with type Int, corresponds to SQLite type "INTEGER"
+    :param:  DoubleVal  A column with type Double, corresponds to SQLite type "DOUBLE"
+    :param:  BoolVal    A column with type Bool, corresponds to SQLite type "BOOLEAN"
+    :param:  DataVal    A column with type NSdata, corresponds to SQLite type "BLOB"
+    :param:  DateVal    A column with type NSDate, corresponds to SQLite type "DATE"
     */
     public enum DataType {
         
-        case string
-        case int
-        case double
-        case bool
-        case data
-        case date
+        case StringVal
+        case IntVal
+        case DoubleVal
+        case BoolVal
+        case DataVal
+        case DateVal
         
         private func toSQL() -> String {
             
             switch self {
                 
-            case string:
+            case .StringVal:
                 return "TEXT"
-            case int:
+            case .IntVal:
                 return "INTEGER"
-            case double:
+            case .DoubleVal:
                 return "DOUBLE"
-            case bool:
+            case .BoolVal:
                 return "BOOLEAN"
-            case data:
+            case .DataVal:
                 return "BLOB"
-            case date:
+            case .DateVal:
                 return "DATE"
             }
         }
@@ -1599,24 +1599,24 @@ extension SwiftData {
     /**
     Flags for custom connection to the SQLite database
     
-    :param:  readOnly         Opens the SQLite database with the flag "SQLITE_OPEN_READONLY"
-    :param:  readWrite        Opens the SQLite database with the flag "SQLITE_OPEN_READWRITE"
-    :param:  readWriteCreate  Opens the SQLite database with the flag "SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE"
+    :param:  ReadOnly         Opens the SQLite database with the flag "SQLITE_OPEN_READONLY"
+    :param:  ReadWrite        Opens the SQLite database with the flag "SQLITE_OPEN_READWRITE"
+    :param:  ReadWriteCreate  Opens the SQLite database with the flag "SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE"
     */
     public enum Flags {
         
-        case readOnly
-        case readWrite
-        case readWriteCreate
+        case ReadOnly
+        case ReadWrite
+        case ReadWriteCreate
     
         private func toSQL() -> Int32 {
             
             switch self {
-            case .readOnly:
+            case .ReadOnly:
                 return SQLITE_OPEN_READONLY
-            case .readWrite:
+            case .ReadWrite:
                 return SQLITE_OPEN_READWRITE
-            case .readWriteCreate:
+            case .ReadWriteCreate:
                 return SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE
             }
             
