@@ -51,7 +51,7 @@ By default, SwiftData creates and uses a database called 'SwiftData.sqlite' in t
 
 To create a table in the database, you may use the convenience function:
 
-```
+```swift
 if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .StringVal, "Population": .IntVal, "IsWarm": .BoolVal, "FoundedIn": .DateVal]) {
     //there was an error during this function, handle it here
 } else {
@@ -71,7 +71,7 @@ The `SD.executeChange()` function can be used to execute any non-query SQL state
 
 To create a table using this function, you could use the following:
 
-```
+```swift
 if let err = SD.executeChange("CREATE TABLE Cities (ID INTEGER PRIMARY KEY AUTOINCREMENT, Name TEXT, Population INTEGER, IsWarm BOOLEAN, FoundedIn DATE)") {
     //there was an error during this function, handle it here
 } else {
@@ -83,7 +83,7 @@ The table created by this function call is the equivalent of the convenience fun
 
 Now that we've created our table, "Cities", we can insert a row into it like so:
 
-```
+```swift
 if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, FoundedIn) VALUES ('Toronto', 2615060, 0, '1793-08-27')") {
     //there was an error during the insert, handle it here
 } else {
@@ -95,7 +95,7 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, Fou
 
 Alternatively, we could insert a row with object binding:
 
-```
+```swift
 //from user input
 let name: String = //user input
 let population: Int = //user input
@@ -134,7 +134,7 @@ All other object types will bind to the SQL string as 'NULL', and a warning mess
 
 If an identifier (e.g. table or column name) is provided by the user and needs to be escaped, you can use the characters 'i?' to bind the objects like so:
 
-```
+```swift
 //from user input
 let columnName1 = //user input
 let columnName2 = //user input
@@ -159,7 +159,7 @@ Objects provided to bind as identifiers must be of type String.
 
 Now that our table has some data, we can query it:
 
-```
+```swift
 let (resultSet, err) = SD.executeQuery("SELECT * FROM Cities")
 if err != nil {
     //there was an error during the query, handle it here
@@ -205,7 +205,7 @@ If one of the above functions is not used, the value will be returned with type 
 
 For example, if you want the string value for the column "Name":
 
-```
+```swift
 if let name = row["Name"].asString() {
     //the value for column "Name" exists as a String
 } else
@@ -215,7 +215,7 @@ if let name = row["Name"].asString() {
 
 You may also execute a query using object binding, similar to the row insert example in an earlier section:
 
-```
+```swift
 let (resultSet, err) = SD.executeQuery("SELECT * FROM Cities WHERE Name = ?", withArgs: ["Toronto"])
 if err != nil {
     //there was an error during the query, handle it here
@@ -263,7 +263,7 @@ By default, error and warning messages are printed to the console when they are 
 
 To create an index, you may use the provided convenience function:
 
-```
+```swift
 if let err = SD.createIndex("NameIndex", onColumns: ["Name"], inTable: "Cities", isUnique: true) {
     //there was an error creating the index, handle it here
 } else {
@@ -280,7 +280,7 @@ Similar convenience functions are provided for: removing an index `let err = rem
 You may create a custom connection to the database and execute a number of functions within a provided closure.
 An example of this can be seen below:
 
-```
+```swift
 let task: ()->Void = {
     if let err = SD.executeChange("INSERT INTO Cities VALUES ('Vancouver', 603502, 1, '1886-04-06')") {
         println("Error inserting city")
@@ -311,7 +311,7 @@ All operations that occur within the provided closure are executed on the single
 
 If we wanted to execute the above closure `task: ()->Void` inside an exclusive transaction, it could be done like so:
 
-```
+```swift
 if let err = transaction(task) {
     //there was an error starting, closing, committing, or rolling back the transaction as per the error code
 } else {
@@ -321,7 +321,7 @@ if let err = transaction(task) {
 
 Similarly, a savepoint could be executed like so:
 
-```
+```swift
 if let err = savepoint(task) {
     //there was an error starting, closing, releasing, or rolling back the savepoint as per the error code
 } else {
