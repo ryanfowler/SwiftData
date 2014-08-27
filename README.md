@@ -247,7 +247,7 @@ let task: ()->Void = {
     }
 }
 
-if let err = SD.executeWithConnection(.readWrite, task) {
+if let err = SD.executeWithConnection(.ReadWrite, task) {
     //there was an error opening or closing the custom connection
 } else {
     //no error, the closure was executed
