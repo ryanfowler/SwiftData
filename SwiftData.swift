@@ -106,7 +106,7 @@ public struct SwiftData {
     
     :returns:         An Int with the error code, or nil if there was no error
     */
-    public static func executeChange(sqlStr: String, withArgs: [AnyObject?]) -> Int? {
+    public static func executeChange(sqlStr: String, withArgs: [AnyObject]) -> Int? {
         
         //create success variable
         var error: Int? = nil
@@ -267,7 +267,7 @@ public struct SwiftData {
     
     :returns:       A tuple containing an Array of "SDRow"s, and an Int with the error code or nil if there was no error
     */
-    public static func executeQuery(sqlStr: String, withArgs: [AnyObject?]) -> (result: [SDRow], error: Int?) {
+    public static func executeQuery(sqlStr: String, withArgs: [AnyObject]) -> (result: [SDRow], error: Int?) {
 
         //create result and error variables
         var result = [SDRow] ()
@@ -1265,7 +1265,7 @@ public struct SwiftData {
         // MARK: SQLite Execution Functions
         
         //execute a SQLite update from a SQL String
-        func executeChange(sqlStr: String, withArgs: [AnyObject?]? = nil) -> Int? {
+        func executeChange(sqlStr: String, withArgs: [AnyObject]? = nil) -> Int? {
             
             var sql = sqlStr
             if let args = withArgs {
@@ -1298,7 +1298,7 @@ public struct SwiftData {
         }
         
         //execute a SQLite query from a SQL String
-        func executeQuery(sqlStr: String, withArgs: [AnyObject?]? = nil) -> (result: [SDRow], error: Int?) {
+        func executeQuery(sqlStr: String, withArgs: [AnyObject]? = nil) -> (result: [SDRow], error: Int?) {
             
             var resultSet = [SDRow]()
                 
@@ -1424,7 +1424,7 @@ public struct SwiftData {
 extension SwiftData.SQLiteDB {
     
     //bind object
-    func bind(objects: [AnyObject?], toSQL sql: String) -> (string: String, error: Int?) {
+    func bind(objects: [AnyObject], toSQL sql: String) -> (string: String, error: Int?) {
 
         var newSql = ""
         var bindIndex = 0

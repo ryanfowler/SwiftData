@@ -59,7 +59,10 @@ if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .StringV
 }
 ```
 
-Similar convenience functions are provided for: deleting a table `let err = SD.deleteTable("TableName")` and finding all existing tables in the database `let (tables, err) = SD.existingTables()`.
+Similar convenience functions are provided for:
+
+- deleting a table `let err = SD.deleteTable("TableName")`
+- finding all existing tables in the database `let (tables, err) = SD.existingTables()`
 
 Alternatively, a table could be created using a SQL statement directly, as shown in the 'Execute A Change' section below.
 
@@ -126,7 +129,6 @@ The objects are escaped and will bind to a SQL string in the following manner:
 - A Bool object is converted to 0 for false, or 1 for true (e.g. 1)
 - An NSDate object is converted to a string with format 'yyyy-MM-dd HH:mm:ss' and surrounded by single quotes (e.g. '2014-08-26 10:30:28')
 - An NSData object is prefaced with an 'X' and converted to a hexadecimal string surrounded by single quotes (e.g. X'1956a76c')
-- nil is converted to a NULL string (e.g. NULL)
 
 All other object types will bind to the SQL string as 'NULL', and a warning message will be printed to the console.
 
@@ -271,7 +273,10 @@ if let err = SD.createIndex("NameIndex", onColumns: ["Name"], inTable: "Cities",
 }
 ```
 
-Similar convenience functions are provided for: removing an index `let err = removeIndex("IndexName")`, finding all existing indexes `let (indexes, err) = existingIndexes()`, and finding all indexes for a specified table `let (indexes, err) = existingIndexesForTable("TableName")`.
+Similar convenience functions are provided for:
+- removing an index `let err = removeIndex("IndexName")`
+- finding all existing indexes `let (indexes, err) = existingIndexes()`
+- finding all indexes for a specified table `let (indexes, err) = existingIndexesForTable("TableName")`.
 
 
 =================
