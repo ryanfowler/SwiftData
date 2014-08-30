@@ -61,8 +61,14 @@ if let err = SD.createTable("Cities", withColumnNamesAndTypes: ["Name": .StringV
 
 Similar convenience functions are provided for:
 
-- deleting a table `let err = SD.deleteTable("TableName")`
-- finding all existing tables in the database `let (tables, err) = SD.existingTables()`
+- deleting a table:
+```swift
+let err = SD.deleteTable("TableName")
+```
+- finding all existing tables in the database:
+```swift
+let (tables, err) = SD.existingTables()
+```
 
 Alternatively, a table could be created using a SQL statement directly, as shown in the 'Execute A Change' section below.
 
@@ -115,9 +121,9 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, Fou
 The provided objects will be escaped and will bind to the '?' characters (in order) in the string of SQL.
 
 Be aware that although this uses similar syntax to prepared statements, it actually uses the public function:
-
-`let escValue = SD.escapeValue(object)`
-
+```swift
+let escValue = SD.escapeValue(object)
+```
 to escape objects internally, which you may also use yourself.
 This means that the objects will attempt to bind to *ALL* '?'s in the string of SQL, including those in strings and comments.
 
@@ -150,9 +156,9 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, i?, i?) VAL
 
 The objects 'columnName1' and 'columnName2' will bind to the characters 'i?' in the string of SQL as identifiers. Double quotes will be placed around each identifier.
 You may escape an identifier string yourself using the function:
-
-`let escIdentifier = SD.escapeIdentifier(identifier)`
-
+```swift
+let escIdentifier = SD.escapeIdentifier(identifier)
+```
 Objects provided to bind as identifiers must be of type String.
 
 
@@ -202,8 +208,9 @@ In order to obtain the column value in the correct data type, you may use the co
 - asBool()
 - asDate()
 - asData()
+- asAnyObject()
 
-If one of the above functions is not used, the value will be returned with type AnyObject.
+If one of the above functions is not used, the value will be an SDColumn object.
 
 For example, if you want the string value for the column "Name":
 
@@ -274,9 +281,18 @@ if let err = SD.createIndex("NameIndex", onColumns: ["Name"], inTable: "Cities",
 ```
 
 Similar convenience functions are provided for:
-- removing an index `let err = removeIndex("IndexName")`
-- finding all existing indexes `let (indexes, err) = existingIndexes()`
-- finding all indexes for a specified table `let (indexes, err) = existingIndexesForTable("TableName")`.
+- removing an index:
+```swift
+let err = removeIndex("IndexName")
+```
+- finding all existing indexes:
+```swift
+let (indexes, err) = existingIndexes()
+```
+- finding all indexes for a specified table:
+```swift
+let (indexes, err) = existingIndexesForTable("TableName")
+```
 
 
 =================

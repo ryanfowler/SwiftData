@@ -1388,23 +1388,68 @@ public struct SwiftData {
         }
         
         //return value by type
+
+        /**
+        Return the column value as a String
+
+        :returns:  An Optional String corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as a String, or the value is NULL
+        */
         public func asString() -> String? {
             return value as? String
         }
+
+        /**
+        Return the column value as an Int
+
+        :returns:  An Optional Int corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as a Int, or the value is NULL
+        */
         public func asInt() -> Int? {
             return value as? Int
         }
+
+        /**
+        Return the column value as a Double
+
+        :returns:  An Optional Double corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as a Double, or the value is NULL
+        */
         public func asDouble() -> Double? {
             return value as? Double
         }
+
+        /**
+        Return the column value as a Bool
+
+        :returns:  An Optional Bool corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as a Bool, or the value is NULL
+        */
         public func asBool() -> Bool? {
             return value as? Bool
         }
+
+        /**
+        Return the column value as NSData
+
+        :returns:  An Optional NSData object corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as NSData, or the value is NULL
+        */
         public func asData() -> NSData? {
             return value as? NSData
         }
+
+        /**
+        Return the column value as an NSDate
+
+        :returns:  An Optional NSDate corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as an NSDate, or the value is NULL
+        */
         public func asDate() -> NSDate? {
             return value as? NSDate
+        }
+
+        /**
+        Return the column value as an AnyObject
+
+        :returns:  An Optional AnyObject corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as an AnyObject, or the value is NULL
+        */
+        public func asAnyObject() -> AnyObject? {
+            return value
         }
         
     }
