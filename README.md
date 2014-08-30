@@ -1,7 +1,7 @@
 SwiftData
 =========
 
-The SQLite C API is a pain in Swift - that's where SwiftData comes in.
+Working with SQLite is a pain in Swift - that's where SwiftData comes in.
 
 SwiftData is a simple and effective wrapper around the SQLite3 C API written completely in Swift.
 
@@ -12,7 +12,7 @@ SwiftData is a simple and effective wrapper around the SQLite3 C API written com
 
 - Execute SQL statements directly
 - Bind objects conveniently to a string of SQL
-- Queries return an easy to handle array of data
+- Queries return an easy to use array
 - Support for transactions and savepoints
 - Inline error handling
 - Completely thread-safe by default
@@ -250,7 +250,7 @@ if err != nil {
 }
 ```
 
-The same binding rules apply as described in the earlier Insert example.
+The same binding rules apply as described in the 'Execute a Change' section.
 
 
 =================
@@ -260,7 +260,9 @@ You have probably noticed that almost all SwiftData functions return an 'error' 
 
 This error value is an Optional Int corresponding to the appropriate error message, which can be obtained by calling the function:
 
-`let errMsg = SD.errorMessageFromCode(err)`
+```swift
+let errMsg = SD.errorMessageFromCode(err)
+```
 
 The error value should always be compared with nil to see if there was an error during the operation, or if the operation was executed successfully.
 
@@ -325,6 +327,8 @@ The available custom connection flags are:
 - .ReadWriteCreate (SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE)
 
 All operations that occur within the provided closure are executed on the single custom connection.
+
+For more information, see the SQLite documentation for [opening a new database connection](http://www.sqlite.org/c3ref/open.html).
 
 
 =================
