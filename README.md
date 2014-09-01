@@ -173,20 +173,20 @@ if err != nil {
     //there was an error during the query, handle it here
 } else {
     for row in resultSet {
-        if let name = row["Name"].asString() {
+        if let name = row["Name"]?.asString() {
             println("The City name is: \(name)")
         }
-        if let population = row["Population"].asInt() {
+        if let population = row["Population"]?.asInt() {
             println("The population is: \(population)")
         }
-        if let isWarm = row["IsWarm"].asBool() {
+        if let isWarm = row["IsWarm"]?.asBool() {
             if isWarm {
                 println("The city is warm")
             } else {
                 println("The city is cold")
             }
         }
-        if let foundedIn = row["FoundedIn"].asDate() {
+        if let foundedIn = row["FoundedIn"]?.asDate() {
             println("The city was founded in: \(foundedIn)")
         }
     }
@@ -215,7 +215,7 @@ If one of the above functions is not used, the value will be an SDColumn object.
 For example, if you want the string value for the column "Name":
 
 ```swift
-if let name = row["Name"].asString() {
+if let name = row["Name"]?.asString() {
     //the value for column "Name" exists as a String
 } else
     //the value is nil, cannot be cast as a String, or the column requested does not exist
@@ -230,20 +230,20 @@ if err != nil {
     //there was an error during the query, handle it here
 } else {
     for row in resultSet {
-        if let name = row["Name"].asString() {
+        if let name = row["Name"]?.asString() {
             println("The City name is: \(name)") //should be "Toronto"
         }
-        if let population = row["Population"].asInt() {
+        if let population = row["Population"]?.asInt() {
             println("The population is: \(population)")
         }
-        if let isWarm = row["IsWarm"].asBool() {
+        if let isWarm = row["IsWarm"]?.asBool() {
             if isWarm {
                 println("The city is warm")
             } else {
                 println("The city is cold")
             }
         }
-        if let foundedIn = row["FoundedIn"].asDate() {
+        if let foundedIn = row["FoundedIn"]?.asDate() {
             println("The city was founded in: \(foundedIn)")
         }
     }
