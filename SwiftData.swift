@@ -23,6 +23,7 @@
 
 
 import Foundation
+import UIKit
 
 
 // MARK: - SwiftData
@@ -313,9 +314,9 @@ public struct SwiftData {
     - custom connection errors (301 - 306)
 
     :param: flags    The custom flag associated with the connection. Can be either:
-                        - .readOnly
-                        - .readWrite
-                        - .readWriteCreate
+                        - .ReadOnly
+                        - .ReadWrite
+                        - .ReadWriteCreate
 
     :param: closure  A closure containing functions that will be executed on the custom connection
 
@@ -972,6 +973,50 @@ public struct SwiftData {
         return error
     }
     
+    /**
+    Convenience function to save a UIImage to disk and return the path
+
+    :param: image  The UIImage to be saved
+
+    :returns:      The path of the saved image as a String, or nil if there was an error saving the image to disk
+    */
+    public static func saveUIImage(image: UIImage) -> String? {
+        
+        let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
+        let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
+
+        if !NSFileManager.defaultManager().fileExistsAtPath(imageDirPath) {
+            if !NSFileManager.defaultManager().createDirectoryAtPath(imageDirPath, withIntermediateDirectories: false, attributes: nil, error: nil) {
+                println("Error creating SwiftData image folder")
+                return nil
+            }
+        }
+
+        let imagePath = imageDirPath.stringByAppendingPathComponent(NSUUID().UUIDString)
+
+        let imageAsData = UIImagePNGRepresentation(image)
+        if !imageAsData.writeToFile(imagePath, atomically: true) {
+            println("Error saving image")
+            return nil
+        }
+        
+        return imagePath
+    
+    }
+    
+    /**
+    Convenience function to delete a UIImage at the specified path
+    
+    :param: path  The path where the UIImage is located
+    
+    :returns:     True if the image was successfully deleted, or false if there was an error during the deletion
+    */
+    public static func deleteUIImageAtPath(path: String) -> Bool {
+        
+        return NSFileManager.defaultManager().removeItemAtPath(path, error: nil)
+        
+    }
+    
     
     // MARK: - SQLiteDB Class
     
@@ -1252,8 +1297,11 @@ public struct SwiftData {
                 let dateFormatter = NSDateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 let text = UnsafePointer<Int8>(sqlite3_column_text(statement, index))
-                let string = String.fromCString(text)
-                return dateFormatter.dateFromString(string)
+                if let string = String.fromCString(text) {
+                    return dateFormatter.dateFromString(string)
+                }
+                println("Warning -> The text date at column: \(index) could not be cast as a String, returning nil")
+                return nil
             default:
                 println("Warning -> Column: \(index) is of an unrecognized type, returning nil")
                 return nil
@@ -1452,6 +1500,23 @@ public struct SwiftData {
             return value
         }
         
+        /**
+        Return the column value path as a UIImage
+
+        :returns:  An Optional UIImage corresponding to the path of the apprioriate column value. Will be nil if: the column name does not exist, the value of the specified path cannot be cast as a UIImage, or the value is NULL
+        */
+        public func asUIImage() -> UIImage? {
+            if let path = value as? String{
+                if !NSFileManager.defaultManager().fileExistsAtPath(path) {
+                    println("Invalid path provided")
+                    return nil
+                }
+                let imageAsData = NSData(contentsOfFile: path)
+                return UIImage(data: imageAsData)
+            }
+            return nil
+        }
+
     }
     
     

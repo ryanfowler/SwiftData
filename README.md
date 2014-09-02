@@ -209,6 +209,7 @@ In order to obtain the column value in the correct data type, you may use the co
 - asDate()
 - asData()
 - asAnyObject()
+- asUIImage()
 
 If one of the above functions is not used, the value will be an SDColumn object.
 
@@ -261,7 +262,7 @@ You have probably noticed that almost all SwiftData functions return an 'error' 
 This error value is an Optional Int corresponding to the appropriate error message, which can be obtained by calling the function:
 
 ```swift
-let errMsg = SD.errorMessageFromCode(err)
+let errMsg = SD.errorMessageForCode(err)
 ```
 
 The error value should always be compared with nil to see if there was an error during the operation, or if the operation was executed successfully.
@@ -358,6 +359,58 @@ It should be noted that transactions *cannot* be embedded into another transacti
 Unlike transactions, savepoints may be embedded into other savepoints or transactions.
 
 For more information, see the SQLite documentation for [transactions](http://sqlite.org/lang_transaction.html) and [savepoints](http://www.sqlite.org/lang_savepoint.html).
+
+
+=================
+###Using UIImages
+
+Convenience functions are provided for working with UIImages.
+
+To easily save a UIImage to disk and insert the corresponding path into the database:
+
+```swift
+let image = UIImage(named:"SampleImage")
+if let imagePath = SD.saveUIImage(image) {
+    if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImage", imagePath]) {
+        //there was an error inserting the new row, handle it here
+    }
+} else {
+    //there was an error saving the image to disk
+}
+```
+
+In the above example, a UIImage is saved to disk and the returned path is inserted into the database as a String.
+In order to easily obtain the UIImage from the database, the function '.asUIImage()' called on an SDColumn object may be used:
+
+```swift
+let (resultSet, err) = SD.executeQuery("SELECT * FROM SampleImageTable")
+if err != nil {
+    //there was an error with the query, handle it here
+} else {
+    for row in resultSet {
+        if let image = row["Image"]?.asUIImage() {
+            //'image' contains the UIImage located at the path stored in this column
+        } else {
+            //the path is invalid, or the image could not be initialized from the data at the specified path
+        }
+    }
+}
+```
+
+The '.asUIImage()' function obtains the path as a String and returns the UIImage located at this path (or will return nil if the path was invalid or a UIImage could not be initialized with the data located at the path).
+
+If you would like to delete the photo, you may call the function:
+
+```swift
+if SD.deleteUIImageAtPath(imagePath) {
+    //image successfully deleted
+} else {
+    //there was an error deleting the image at the specified path
+}
+```
+
+This function should be called to delete the image at the specified path from disk *before* the row containing the image path is removed.
+Removing the row containing the image path from the database does not delete the image stored on disk.
 
 
 =================
