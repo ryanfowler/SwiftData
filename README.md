@@ -135,6 +135,7 @@ The objects are escaped and will bind to a SQL string in the following manner:
 - A Bool object is converted to 0 for false, or 1 for true (e.g. 1)
 - An NSDate object is converted to a string with format 'yyyy-MM-dd HH:mm:ss' and surrounded by single quotes (e.g. '2014-08-26 10:30:28')
 - An NSData object is prefaced with an 'X' and converted to a hexadecimal string surrounded by single quotes (e.g. X'1956a76c')
+- A UIImage object is saved to disk, and the path is saved as a string surrounded by single quotes (e.g. '/pathToStringOnDisk')
 
 All other object types will bind to the SQL string as 'NULL', and a warning message will be printed to the console.
 
@@ -371,7 +372,7 @@ To easily save a UIImage to disk and insert the corresponding path into the data
 ```swift
 let image = UIImage(named:"SampleImage")
 if let imagePath = SD.saveUIImage(image) {
-    if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImage", imagePath]) {
+    if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImageName", imagePath]) {
         //there was an error inserting the new row, handle it here
     }
 } else {
@@ -379,7 +380,18 @@ if let imagePath = SD.saveUIImage(image) {
 }
 ```
 
-In the above example, a UIImage is saved to disk and the returned path is inserted into the database as a String.
+Alternatively, object binding can also be used:
+
+```swift
+let image = UIImage(named:"SampleImage")
+if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImageName", image]) {
+    //there was an error inserting the new row, handle it here
+} else {
+    //the image was saved to disk, and the path was inserted into the database as a String
+}
+```
+
+In the examples above, a UIImage is saved to disk and the returned path is inserted into the database as a String.
 In order to easily obtain the UIImage from the database, the function '.asUIImage()' called on an SDColumn object may be used:
 
 ```swift

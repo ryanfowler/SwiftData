@@ -1616,6 +1616,14 @@ extension SwiftData.SQLiteDB {
                 return "\(escapeValue(dateFormatter.stringFromDate(obj as NSDate)))"
             }
             
+            if obj is UIImage {
+                if let imagePath = SD.saveUIImage(obj as UIImage) {
+                    return "'\(escapeStringValue(imagePath))'"
+                }
+                println("Warning -> Cannot save image, NULL will be inserted into the database")
+                return "NULL"
+            }
+            
             println("Warning -> Object: \(obj) is not a supported type and will be inserted into the database as NULL")
             return "NULL"
             
@@ -1669,12 +1677,13 @@ extension SwiftData {
     /**
     Column Data Types
     
-    :param:  StringVal  A column with type String, corresponds to SQLite type "TEXT"
-    :param:  IntVal     A column with type Int, corresponds to SQLite type "INTEGER"
-    :param:  DoubleVal  A column with type Double, corresponds to SQLite type "DOUBLE"
-    :param:  BoolVal    A column with type Bool, corresponds to SQLite type "BOOLEAN"
-    :param:  DataVal    A column with type NSdata, corresponds to SQLite type "BLOB"
-    :param:  DateVal    A column with type NSDate, corresponds to SQLite type "DATE"
+    :param:  StringVal   A column with type String, corresponds to SQLite type "TEXT"
+    :param:  IntVal      A column with type Int, corresponds to SQLite type "INTEGER"
+    :param:  DoubleVal   A column with type Double, corresponds to SQLite type "DOUBLE"
+    :param:  BoolVal     A column with type Bool, corresponds to SQLite type "BOOLEAN"
+    :param:  DataVal     A column with type NSdata, corresponds to SQLite type "BLOB"
+    :param:  DateVal     A column with type NSDate, corresponds to SQLite type "DATE"
+    :param:  UIImageVal  A column with type String (the path value of saved UIImage), corresponds to SQLite type "TEXT"
     */
     public enum DataType {
         
@@ -1684,12 +1693,13 @@ extension SwiftData {
         case BoolVal
         case DataVal
         case DateVal
+        case UIImageVal
         
         private func toSQL() -> String {
             
             switch self {
                 
-            case .StringVal:
+            case .StringVal, .UIImageVal:
                 return "TEXT"
             case .IntVal:
                 return "INTEGER"
