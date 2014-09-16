@@ -1335,6 +1335,8 @@ public struct SwiftData {
             var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
             if status != SQLITE_OK {
                 println("Error During Prepare -> SQLITE Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                let errorMessage = NSString(UTF8String: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB))
+                println("Error message: " + errorMessage)
                 sqlite3_finalize(pStmt)
                 return Int(status)
             }
@@ -1342,6 +1344,8 @@ public struct SwiftData {
             status = sqlite3_step(pStmt)
             if status != SQLITE_DONE && status != SQLITE_OK {
                 println("Error During Step -> SQLITE Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                let errorMessage = NSString(UTF8String: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB))
+                println("Error message: " + errorMessage)
                 sqlite3_finalize(pStmt)
                 return Int(status)
             }
@@ -1370,6 +1374,8 @@ public struct SwiftData {
             var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
             if status != SQLITE_OK {
                 println("Error During Prepare -> SQLITE Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                let errorMessage = NSString(UTF8String: sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB))
+                println("Error message: " + errorMessage)
                 sqlite3_finalize(pStmt)
                 return (resultSet, Int(status))
             }
