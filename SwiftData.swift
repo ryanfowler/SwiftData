@@ -974,11 +974,11 @@ public struct SwiftData {
     }
     
     /**
-    Convenience function to save a UIImage to disk and return the path
+    Convenience function to save a UIImage to disk and return the ID
 
     :param: image  The UIImage to be saved
 
-    :returns:      The path of the saved image as a String, or nil if there was an error saving the image to disk
+    :returns:      The ID of the saved image as a String, or nil if there was an error saving the image to disk
     */
     public static func saveUIImage(image: UIImage) -> String? {
         
@@ -991,8 +991,10 @@ public struct SwiftData {
                 return nil
             }
         }
+        
+        let imageID = NSUUID().UUIDString
 
-        let imagePath = imageDirPath.stringByAppendingPathComponent(NSUUID().UUIDString)
+        let imagePath = imageDirPath.stringByAppendingPathComponent(imageID)
 
         let imageAsData = UIImagePNGRepresentation(image)
         if !imageAsData.writeToFile(imagePath, atomically: true) {
@@ -1000,20 +1002,24 @@ public struct SwiftData {
             return nil
         }
         
-        return imagePath
+        return imageID
     
     }
     
     /**
-    Convenience function to delete a UIImage at the specified path
+    Convenience function to delete a UIImage with the specified ID
     
-    :param: path  The path where the UIImage is located
+    :param: id  The id of the UIImage
     
-    :returns:     True if the image was successfully deleted, or false if there was an error during the deletion
+    :returns:   True if the image was successfully deleted, or false if there was an error during the deletion
     */
-    public static func deleteUIImageAtPath(path: String) -> Bool {
+    public static func deleteUIImageWithID(id: String) -> Bool {
         
-        return NSFileManager.defaultManager().removeItemAtPath(path, error: nil)
+        let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
+        let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
+        let fullPath = imageDirPath.stringByAppendingPathComponent(id)
+        
+        return NSFileManager.defaultManager().removeItemAtPath(fullPath, error: nil)
         
     }
     
@@ -1507,11 +1513,14 @@ public struct SwiftData {
         */
         public func asUIImage() -> UIImage? {
             if let path = value as? String{
-                if !NSFileManager.defaultManager().fileExistsAtPath(path) {
-                    println("Invalid path provided")
+                let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
+                let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
+                let fullPath = imageDirPath.stringByAppendingPathComponent(path)
+                if !NSFileManager.defaultManager().fileExistsAtPath(fullPath) {
+                    println("Invalid image ID provided")
                     return nil
                 }
-                let imageAsData = NSData(contentsOfFile: path)
+                let imageAsData = NSData(contentsOfFile: fullPath)
                 return UIImage(data: imageAsData)
             }
             return nil
@@ -1617,8 +1626,8 @@ extension SwiftData.SQLiteDB {
             }
             
             if obj is UIImage {
-                if let imagePath = SD.saveUIImage(obj as UIImage) {
-                    return "'\(escapeStringValue(imagePath))'"
+                if let imageID = SD.saveUIImage(obj as UIImage) {
+                    return "'\(escapeStringValue(imageID))'"
                 }
                 println("Warning -> Cannot save image, NULL will be inserted into the database")
                 return "NULL"

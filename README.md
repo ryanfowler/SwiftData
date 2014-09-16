@@ -5,8 +5,6 @@ Working with SQLite is a pain in Swift - that's where SwiftData comes in.
 
 SwiftData is a simple and effective wrapper around the SQLite3 C API written completely in Swift.
 
-**Note:** *Like Swift, this is beta software. Expect breaking changes until Swift 1.0 is released.*
-
 
 ##Features
 
@@ -367,12 +365,12 @@ For more information, see the SQLite documentation for [transactions](http://sql
 
 Convenience functions are provided for working with UIImages.
 
-To easily save a UIImage to disk and insert the corresponding path into the database:
+To easily save a UIImage to disk and insert the corresponding ID into the database:
 
 ```swift
 let image = UIImage(named:"SampleImage")
-if let imagePath = SD.saveUIImage(image) {
-    if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImageName", imagePath]) {
+if let imageID = SD.saveUIImage(image) {
+    if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImageName", imageID]) {
         //there was an error inserting the new row, handle it here
     }
 } else {
@@ -387,11 +385,11 @@ let image = UIImage(named:"SampleImage")
 if let err = SD.executeChange("INSERT INTO SampleImageTable (Name, Image) VALUES (?, ?)", withArgs: ["SampleImageName", image]) {
     //there was an error inserting the new row, handle it here
 } else {
-    //the image was saved to disk, and the path was inserted into the database as a String
+    //the image was saved to disk, and the ID was inserted into the database as a String
 }
 ```
 
-In the examples above, a UIImage is saved to disk and the returned path is inserted into the database as a String.
+In the examples above, a UIImage is saved to disk and the returned ID is inserted into the database as a String.
 In order to easily obtain the UIImage from the database, the function '.asUIImage()' called on an SDColumn object may be used:
 
 ```swift
@@ -401,28 +399,28 @@ if err != nil {
 } else {
     for row in resultSet {
         if let image = row["Image"]?.asUIImage() {
-            //'image' contains the UIImage located at the path stored in this column
+            //'image' contains the UIImage with the ID stored in this column
         } else {
-            //the path is invalid, or the image could not be initialized from the data at the specified path
+            //the ID is invalid, or the image could not be initialized from the data at the specified path
         }
     }
 }
 ```
 
-The '.asUIImage()' function obtains the path as a String and returns the UIImage located at this path (or will return nil if the path was invalid or a UIImage could not be initialized with the data located at the path).
+The '.asUIImage()' function obtains the ID as a String and returns the UIImage associated with this ID (or will return nil if the ID was invalid or a UIImage could not be initialized).
 
 If you would like to delete the photo, you may call the function:
 
 ```swift
-if SD.deleteUIImageAtPath(imagePath) {
+if SD.deleteUIImageWithID(imageID) {
     //image successfully deleted
 } else {
-    //there was an error deleting the image at the specified path
+    //there was an error deleting the image with the specified ID
 }
 ```
 
-This function should be called to delete the image at the specified path from disk *before* the row containing the image path is removed.
-Removing the row containing the image path from the database does not delete the image stored on disk.
+This function should be called to delete the image with the specified ID from disk *before* the row containing the image ID is removed.
+Removing the row containing the image ID from the database does not delete the image stored on disk.
 
 
 =================
