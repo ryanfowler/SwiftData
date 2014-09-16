@@ -264,7 +264,7 @@ This error value is an Optional Int corresponding to the appropriate error messa
 let errMsg = SD.errorMessageForCode(err)
 ```
 
-The error value should always be compared with nil to see if there was an error during the operation, or if the operation was executed successfully.
+It is recommended to compare the error value with nil to see if there was an error during the operation, or if the operation was executed successfully.
 
 By default, error and warning messages are printed to the console when they are encountered.
 

@@ -173,7 +173,7 @@ public struct SwiftData {
                 if let err = SQLiteDB.sharedInstance.executeChange(sqlStr) {
                     SQLiteDB.sharedInstance.close()
                     if let index = find(sqlArr, sqlStr) {
-                        println("Error occurred on item: \(index) -> \"\(sqlStr)\"")
+                        println("Error occurred on array item: \(index) -> \"\(sqlStr)\"")
                     }
                     error = err
                     return
@@ -1064,7 +1064,11 @@ public struct SwiftData {
             //open connection
             let status = sqlite3_open(dbPath.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB)
             if status != SQLITE_OK {
-                println("Error opening SQLite Database: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: Opening Database")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
                 return Int(status)
             }
             
@@ -1078,32 +1082,40 @@ public struct SwiftData {
             
             //check if in transaction
             if inTransaction {
-                println("Error opening SQLite Database with flags -> Cannot open a custom connection inside a transaction")
+                println("SwiftData Error -> During: Opening Database with Flags")
+                println("                -> Code: 302 - Cannot open a custom connection inside a transaction")
                 return 302
             }
             
             //check if already openWithFlags
             if openWithFlags {
-                println("Error opening SQLite Database with flags -> A custom connection is already open")
+                println("SwiftData Error -> During: Opening Database with Flags")
+                println("                -> Code: 301 - A custom connection is already open")
                 return 301
             }
             
             //check if in savepoint
             if savepointsOpen > 0 {
-                println("Error opening SQLite Database with flags -> Cannot open a custom connection inside a savepoint")
+                println("SwiftData Error -> During: Opening Database with Flags")
+                println("                -> Code: 303 - Cannot open a custom connection inside a savepoint")
                 return 303
             }
             
             //check if already opened
             if isConnected {
-                println("Error opening SQLite Database with flags -> A custom connection is already open")
+                println("SwiftData Error -> During: Opening Database with Flags")
+                println("                -> Code: 301 - A custom connection is already open")
                 return 301
             }
             
             //open the connection
             let status = sqlite3_open_v2(dbPath.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB, flags, nil)
             if status != SQLITE_OK {
-                println("Error opening SQLite Database with flags: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: Opening Database with Flags")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
                 return Int(status)
             }
             
@@ -1129,7 +1141,11 @@ public struct SwiftData {
             //close connection
             let status = sqlite3_close(sqliteDB)
             if status != SQLITE_OK {
-                println("Error closing the SQLite Database: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: Closing Database")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
             }
             
             sqliteDB = nil
@@ -1141,19 +1157,22 @@ public struct SwiftData {
             
             //check if in trasaction
             if inTransaction {
-                println("Error closing custom SQLite Database -> Cannot close a custom connection inside a transaction")
+                println("SwiftData Error -> During: Closing Database with Flags")
+                println("                -> Code: 305 - Cannot close a custom connection inside a transaction")
                 return 305
             }
             
             //check if in savepoint
             if savepointsOpen > 0 {
-                println("Error closing custom SQLite Database -> Cannot close a custom connection inside a savepoint")
+                println("SwiftData Error -> During: Closing Database with Flags")
+                println("                -> Code: 306 - Cannot close a custom connection inside a savepoint")
                 return 306
             }
             
             //check if no custom connectino open
             if !openWithFlags {
-                println("Error closing custom SQLite Database -> A custom connection is not currently open")
+                println("SwiftData Error -> During: Closing Database with Flags")
+                println("                -> Code: 304 - A custom connection is not currently open")
                 return 304
             }
             
@@ -1165,7 +1184,11 @@ public struct SwiftData {
             openWithFlags = false
 
             if status != SQLITE_OK {
-                println("Error closing the custom SQLite Database: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: Closing Database with Flags")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
                 return Int(status)
             }
             
@@ -1186,21 +1209,23 @@ public struct SwiftData {
         func beginTransaction() -> Int? {
             
             if savepointsOpen > 0 {
-                println("Error beginning transaction -> Cannot begin a transaction within a savepoint")
+                println("SwiftData Error -> During: Beginning Transaction")
+                println("                -> Code: 501 - Cannot begin a transaction within a savepoint")
                 return 501
             }
 
             if inTransaction {
-                println("Error beginning transaction -> Cannot begin a transaction within another transaction")
+                println("SwiftData Error -> During: Beginning Transaction")
+                println("                -> Code: 502 - Cannot begin a transaction within another transaction")
                 return 502
             }
             
             if let error = executeChange("BEGIN EXCLUSIVE") {
-                println("Error beginning transaction")
                 return error
             }
             
             inTransaction = true
+            
             return nil
             
         }
@@ -1234,11 +1259,11 @@ public struct SwiftData {
         func beginSavepoint() -> Int? {
             
             if let error = executeChange("SAVEPOINT 'savepoint\(savepointsOpen + 1)'") {
-                println("Error beginning savepoint")
                 return error
             }
 
             ++savepointsOpen
+            
             return nil
         }
         
@@ -1306,10 +1331,10 @@ public struct SwiftData {
                 if let string = String.fromCString(text) {
                     return dateFormatter.dateFromString(string)
                 }
-                println("Warning -> The text date at column: \(index) could not be cast as a String, returning nil")
+                println("SwiftData Warning -> The text date at column: \(index) could not be cast as a String, returning nil")
                 return nil
             default:
-                println("Warning -> Column: \(index) is of an unrecognized type, returning nil")
+                println("SwiftData Warning -> Column: \(index) is of an unrecognized type, returning nil")
                 return nil
             }
             
@@ -1334,14 +1359,22 @@ public struct SwiftData {
             var pStmt: COpaquePointer = nil
             var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
             if status != SQLITE_OK {
-                println("Error During Prepare -> SQLITE Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: SQL Prepare")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
                 sqlite3_finalize(pStmt)
                 return Int(status)
             }
             
             status = sqlite3_step(pStmt)
             if status != SQLITE_DONE && status != SQLITE_OK {
-                println("Error During Step -> SQLITE Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: SQL Step")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
                 sqlite3_finalize(pStmt)
                 return Int(status)
             }
@@ -1369,7 +1402,11 @@ public struct SwiftData {
             var pStmt: COpaquePointer = nil
             var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
             if status != SQLITE_OK {
-                println("Error During Prepare -> SQLITE Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                println("SwiftData Error -> During: SQL Prepare")
+                println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                    println("                -> Details: \(errMsg)")
+                }
                 sqlite3_finalize(pStmt)
                 return (resultSet, Int(status))
             }
@@ -1394,7 +1431,11 @@ public struct SwiftData {
                 } else if status == SQLITE_DONE {
                     next = false
                 } else {
-                    println("Error During Step -> SQLITE Error Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                    println("SwiftData Error -> During: SQL Step")
+                    println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
+                    if let errMsg = String.fromCString(sqlite3_errmsg(SQLiteDB.sharedInstance.sqliteDB)) {
+                        println("                -> Details: \(errMsg)")
+                    }
                     sqlite3_finalize(pStmt)
                     return (resultSet, Int(status))
                 }
@@ -1517,7 +1558,7 @@ public struct SwiftData {
                 let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
                 let fullPath = imageDirPath.stringByAppendingPathComponent(path)
                 if !NSFileManager.defaultManager().fileExistsAtPath(fullPath) {
-                    println("Invalid image ID provided")
+                    println("SwiftData Error -> Invalid image ID provided")
                     return nil
                 }
                 let imageAsData = NSData(contentsOfFile: fullPath)
@@ -1551,7 +1592,8 @@ extension SwiftData.SQLiteDB {
         for char in sql {
             if char == "?" {
                 if bindIndex > objects.count - 1 {
-                    println("Error during binding -> Not enough objects to bind provided")
+                    println("SwiftData Error -> During: Object Binding")
+                    println("                -> Code: 201 - Not enough objects to bind provided")
                     return ("", 201)
                 }
                 var obj = ""
@@ -1559,7 +1601,8 @@ extension SwiftData.SQLiteDB {
                     if let str = objects[bindIndex] as? String {
                         obj = escapeIdentifier(str)
                     } else {
-                        println("Error during binding -> Object to bind as identifier must be a String at array location: \(bindIndex)")
+                        println("SwiftData Error -> During: Object Binding")
+                        println("                -> Code: 203 - Object to bind as identifier must be a String at array location: \(bindIndex)")
                         return ("", 203)
                     }
                     newSql = newSql.substringToIndex(newSql.endIndex.predecessor())
@@ -1579,7 +1622,8 @@ extension SwiftData.SQLiteDB {
         }
         
         if bindIndex != objects.count {
-            println("Error during binding -> Too many objects to bind provided")
+            println("SwiftData Error -> During: Object Binding")
+            println("                -> Code: 202 - Too many objects to bind provided")
             return ("", 202)
         }
         
@@ -1629,11 +1673,11 @@ extension SwiftData.SQLiteDB {
                 if let imageID = SD.saveUIImage(obj as UIImage) {
                     return "'\(escapeStringValue(imageID))'"
                 }
-                println("Warning -> Cannot save image, NULL will be inserted into the database")
+                println("SwiftData Warning -> Cannot save image, NULL will be inserted into the database")
                 return "NULL"
             }
             
-            println("Warning -> Object: \(obj) is not a supported type and will be inserted into the database as NULL")
+            println("SwiftData Warning -> Object \"\(obj)\" is not a supported type and will be inserted into the database as NULL")
             return "NULL"
             
         } else {
@@ -1800,7 +1844,8 @@ extension SwiftData.SQLiteDB {
             if let table = row["name"]?.asString() {
                 tableArr.append(table)
             } else {
-                println("Error finding existing tables -> Error extracting table names from sqlite_master")
+                println("SwiftData Error -> During: Finding Existing Tables")
+                println("                -> Code: 403 - Error extracting table names from sqlite_master")
                 return (tableArr, 403)
             }
         }
@@ -1812,7 +1857,8 @@ extension SwiftData.SQLiteDB {
     func createIndex(name: String, columns: [String], table: String, unique: Bool) -> Int? {
         
         if columns.count < 1 {
-            println("Error -> At least one column name must be provided")
+            println("SwiftData Error -> During: Creating Index")
+            println("                -> Code: 401 - At least one column name must be provided")
             return 401
         }
         
@@ -1858,6 +1904,8 @@ extension SwiftData.SQLiteDB {
             if let index = res["name"]?.asString() {
                 indexArr.append(index)
             } else {
+                println("SwiftData Error -> During: Finding Existing Indexes")
+                println("                -> Code: 402 - Error extracting index names from sqlite_master")
                 println("Error finding existing indexes -> Error extracting index names from sqlite_master")
                 return (indexArr, 402)
             }
@@ -1879,7 +1927,8 @@ extension SwiftData.SQLiteDB {
             if let index = res["name"]?.asString() {
                 indexArr.append(index)
             } else {
-                println("Error finding existing indexes -> Error extracting index names from sqlite_master")
+                println("SwiftData Error -> During: Finding Existing Indexes for a Table")
+                println("                -> Code: 402 - Error extracting index names from sqlite_master")
                 return (indexArr, 402)
             }
         }
