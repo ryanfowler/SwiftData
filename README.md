@@ -133,7 +133,7 @@ The objects are escaped and will bind to a SQL string in the following manner:
 - A Bool object is converted to 0 for false, or 1 for true (e.g. 1)
 - An NSDate object is converted to a string with format 'yyyy-MM-dd HH:mm:ss' and surrounded by single quotes (e.g. '2014-08-26 10:30:28')
 - An NSData object is prefaced with an 'X' and converted to a hexadecimal string surrounded by single quotes (e.g. X'1956a76c')
-- A UIImage object is saved to disk, and the path is saved as a string surrounded by single quotes (e.g. '/pathToStringOnDisk')
+- A UIImage object is saved to disk, and the ID for retrieval is saved as a string surrounded by single quotes (e.g. 'a98af5ca-7700-4abc-97fb-60737a7b6583')
 
 All other object types will bind to the SQL string as 'NULL', and a warning message will be printed to the console.
 
