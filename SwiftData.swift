@@ -1580,7 +1580,9 @@ public struct SwiftData {
                     return nil
                 }
                 let imageAsData = NSData(contentsOfFile: fullPath)
-                return UIImage(data: imageAsData)
+                if let imageAsData = imageAsData {
+                    return UIImage(data: imageAsData)
+                }
             }
             return nil
         }
