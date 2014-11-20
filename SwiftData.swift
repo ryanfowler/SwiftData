@@ -32,7 +32,9 @@ public struct SwiftData {
     
     
     // MARK: - Public SwiftData Functions
-    
+    public static func establishDatabase(path : String) {
+        SQLiteDB.sharedInstance.updatePath(path);
+    }
     
     // MARK: - Execute Statements
     
@@ -107,7 +109,7 @@ public struct SwiftData {
     
     :returns:         An Int with the error code, or nil if there was no error
     */
-    public static func executeChange(sqlStr: String, withArgs: [AnyObject]) -> Int? {
+    public static func executeChange(sqlStr: String, withArgs: [Any]) -> Int? {
         
         //create success variable
         var error: Int? = nil
@@ -268,7 +270,7 @@ public struct SwiftData {
     
     :returns:       A tuple containing an Array of "SDRow"s, and an Int with the error code or nil if there was no error
     */
-    public static func executeQuery(sqlStr: String, withArgs: [AnyObject]) -> (result: [SDRow], error: Int?) {
+    public static func executeQuery(sqlStr: String, withArgs: [Any]) -> (result: [SDRow], error: Int?) {
 
         //create result and error variables
         var result = [SDRow] ()
@@ -371,7 +373,7 @@ public struct SwiftData {
     
     :returns:    The escaped value as a String, ready to be inserted into a SQL statement. Note: Single quotes (') will be placed around the entire value, if necessary.
     */
-    public static func escapeValue(obj: AnyObject?) -> String {
+    public static func escapeValue(obj: Any?) -> String {
         
         return SQLiteDB.sharedInstance.escapeValue(obj)
     }
@@ -980,6 +982,7 @@ public struct SwiftData {
 
     :returns:      The ID of the saved image as a String, or nil if there was an error saving the image to disk
     */
+
     public static func saveUIImage(image: UIImage) -> String? {
         
         let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
@@ -1026,7 +1029,7 @@ public struct SwiftData {
     
     // MARK: - SQLiteDB Class
     
-    private class SQLiteDB {
+    public class SQLiteDB {
         
         //create a single instance of SQLiteDB
         class var sharedInstance: SQLiteDB {
@@ -1045,6 +1048,13 @@ public struct SwiftData {
         var savepointsOpen = 0
         let queue = dispatch_queue_create("SwiftData.DatabaseQueue", DISPATCH_QUEUE_SERIAL)
         
+        func updatePath(path : String) {
+            if self.isConnected {
+                close()
+            }
+            self.dbPath = path
+            open()
+        }
         
         // MARK: - Database Handling Functions
         
@@ -1344,7 +1354,7 @@ public struct SwiftData {
         // MARK: SQLite Execution Functions
         
         //execute a SQLite update from a SQL String
-        func executeChange(sqlStr: String, withArgs: [AnyObject]? = nil) -> Int? {
+        func executeChange(sqlStr: String, withArgs: [Any]? = nil) -> Int? {
             
             var sql = sqlStr
             if let args = withArgs {
@@ -1385,7 +1395,7 @@ public struct SwiftData {
         }
         
         //execute a SQLite query from a SQL String
-        func executeQuery(sqlStr: String, withArgs: [AnyObject]? = nil) -> (result: [SDRow], error: Int?) {
+        func executeQuery(sqlStr: String, withArgs: [Any]? = nil) -> (result: [SDRow], error: Int?) {
             
             var resultSet = [SDRow]()
                 
@@ -1594,17 +1604,18 @@ public struct SwiftData {
     
     private struct SDError {
         
-    }
+    } // end struct SDError
     
 }
 
 
 // MARK: - Escaping And Binding Functions
 
+    
 extension SwiftData.SQLiteDB {
     
     //bind object
-    func bind(objects: [AnyObject], toSQL sql: String) -> (string: String, error: Int?) {
+    func bind(objects: [Any], toSQL sql: String) -> (string: String, error: Int?) {
 
         var newSql = ""
         var bindIndex = 0
@@ -1651,9 +1662,9 @@ extension SwiftData.SQLiteDB {
     }
     
     //return escaped String value of AnyObject
-    func escapeValue(obj: AnyObject?) -> String {
+    func escapeValue(obj: Any?) -> String {
         
-        if let obj: AnyObject = obj {
+        if let obj: Any = obj {
             
             if obj is String {
                 return "'\(escapeStringValue(obj as String))'"
@@ -1681,6 +1692,10 @@ extension SwiftData.SQLiteDB {
                 }
                 
                 return "X'\(newStr)'"
+            }
+            
+            if obj is NSNull {
+                return "NULL"
             }
             
             if obj is NSDate {
