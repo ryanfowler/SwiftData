@@ -438,9 +438,7 @@ Full API Documentation can be found [here](http://ryanfowler.github.io/SwiftData
 
 ##Contact
 
-Email: ryan.fowler19 [at] gmail.com
-
-Comments, concerns, ideas, and pull requests welcome :)
+Please open an issue for any comments, concerns, ideas, or potential pull requests - all welcome :)
 
 
 ##License

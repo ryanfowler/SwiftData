@@ -1,7 +1,7 @@
 //
 // SwiftData.swift
 //
-// Copyright (c) 2014 Ryan Fowler
+// Copyright (c) 2015 Ryan Fowler
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -52,36 +52,18 @@ public struct SwiftData {
     */
     public static func executeChange(sqlStr: String) -> Int? {
         
-        //create error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-            
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the change statement
             error = SQLiteDB.sharedInstance.executeChange(sqlStr)
-        
-            //close database connection
             SQLiteDB.sharedInstance.close()
-
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -108,37 +90,19 @@ public struct SwiftData {
     :returns:         An Int with the error code, or nil if there was no error
     */
     public static func executeChange(sqlStr: String, withArgs: [AnyObject]) -> Int? {
-        
-        //create success variable
-        var error: Int? = nil
 
-        //create task closure
+        var error: Int? = nil
         let task: ()->Void = {
-    
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the change statement
             error = SQLiteDB.sharedInstance.executeChange(sqlStr, withArgs: withArgs)
-        
-            //close database connection
             SQLiteDB.sharedInstance.close()
-    
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -156,19 +120,12 @@ public struct SwiftData {
     */
     public static func executeMultipleChanges(sqlArr: [String]) -> Int? {
         
-        //create error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-            
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the change statements
             for sqlStr in sqlArr {
                 if let err = SQLiteDB.sharedInstance.executeChange(sqlStr) {
                     SQLiteDB.sharedInstance.close()
@@ -179,22 +136,11 @@ public struct SwiftData {
                     return
                 }
             }
-        
-            //close database connection
             SQLiteDB.sharedInstance.close()
-
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -218,37 +164,19 @@ public struct SwiftData {
     */
     public static func executeQuery(sqlStr: String) -> (result: [SDRow], error: Int?) {
         
-        //create result and error variables
         var result = [SDRow] ()
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the query statement
             (result, error) = SQLiteDB.sharedInstance.executeQuery(sqlStr)
-        
-            //close database connection
             SQLiteDB.sharedInstance.close()
-
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
     
     /**
@@ -270,37 +198,19 @@ public struct SwiftData {
     */
     public static func executeQuery(sqlStr: String, withArgs: [AnyObject]) -> (result: [SDRow], error: Int?) {
 
-        //create result and error variables
         var result = [SDRow] ()
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the query statement
             (result, error) = SQLiteDB.sharedInstance.executeQuery(sqlStr, withArgs: withArgs)
-        
-            //close database connection
             SQLiteDB.sharedInstance.close()
-
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
 
     /**
@@ -323,40 +233,22 @@ public struct SwiftData {
     :returns:        An Int with the error code, or nil if there was no error
     */
     public static func executeWithConnection(flags: SD.Flags, closure: ()->Void) -> Int? {
-        
-        //create error variable
+
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open the custom connection
             if let err = SQLiteDB.sharedInstance.openWithFlags(flags.toSQL()) {
                 error = err
                 return
             }
-
-            //execute the closure
             closure()
-
-            //close the custom connection
             if let err = SQLiteDB.sharedInstance.closeCustomConnection() {
                 error = err
                 return
             }
-    
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
 
     
@@ -372,7 +264,6 @@ public struct SwiftData {
     :returns:    The escaped value as a String, ready to be inserted into a SQL statement. Note: Single quotes (') will be placed around the entire value, if necessary.
     */
     public static func escapeValue(obj: AnyObject?) -> String {
-        
         return SQLiteDB.sharedInstance.escapeValue(obj)
     }
     
@@ -384,7 +275,6 @@ public struct SwiftData {
     :returns:    The escaped identifier as a String, ready to be inserted into a SQL statement. Note: Double quotes (") will be placed around the entire identifier.
     */
     public static func escapeIdentifier(obj: String) -> String {
-        
         return SQLiteDB.sharedInstance.escapeIdentifier(obj)
     }
     
@@ -407,36 +297,18 @@ public struct SwiftData {
     */
     public static func createTable(table: String, withColumnNamesAndTypes values: [String: SwiftData.DataType]) -> Int? {
         
-        //create the error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the statement
             error = SQLiteDB.sharedInstance.createSQLTable(table, withColumnsAndTypes: values)
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -452,36 +324,18 @@ public struct SwiftData {
     */
     public static func deleteTable(table: String) -> Int? {
         
-        //create the error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the statement
             error = SQLiteDB.sharedInstance.deleteSQLTable(table)
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -496,37 +350,19 @@ public struct SwiftData {
     */
     public static func existingTables() -> (result: [String], error: Int?) {
         
-        //create result and error variables
         var result = [String] ()
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the statement
             (result, error) = SQLiteDB.sharedInstance.existingTables()
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
     
     
@@ -541,7 +377,6 @@ public struct SwiftData {
     :returns:     The error message relating to the provided error code
     */
     public static func errorMessageForCode(code: Int) -> String {
-            
         return SwiftData.SDError.errorMessageFromCode(code)
     }
 
@@ -551,7 +386,6 @@ public struct SwiftData {
     :returns:  The path to the SwiftData database
     */
     public static func databasePath() -> String {
-        
         return SQLiteDB.sharedInstance.dbPath
     }
     
@@ -568,37 +402,19 @@ public struct SwiftData {
     */
     public static func lastInsertedRowID() -> (rowID: Int, error: Int?) {
         
-        //create result and error variables
         var result = 0
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //find the last inserted row id
             result = SQLiteDB.sharedInstance.lastInsertedRowID()
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
     
     /**
@@ -614,37 +430,19 @@ public struct SwiftData {
     */
     public static func numberOfRowsModified() -> (rowID: Int, error: Int?) {
         
-        //create result and error variables
         var result = 0
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //find the number of rows modified
             result = SQLiteDB.sharedInstance.numberOfRowsModified()
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
     
     
@@ -667,36 +465,18 @@ public struct SwiftData {
     */
     public static func createIndex(#name: String, onColumns: [String], inTable: String, isUnique: Bool = false) -> Int? {
         
-        //create the error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-        
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //create the index
             error = SQLiteDB.sharedInstance.createIndex(name, columns: onColumns, table: inTable, unique: isUnique)
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -712,36 +492,18 @@ public struct SwiftData {
     */
     public static func removeIndex(indexName: String) -> Int? {
         
-        //create the error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-        
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //remove the index
             error = SQLiteDB.sharedInstance.removeIndex(indexName)
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -756,37 +518,19 @@ public struct SwiftData {
     */
     public static func existingIndexes() -> (result: [String], error: Int?) {
         
-        //create the result and error variables
         var result = [String] ()
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the statement
             (result, error) = SQLiteDB.sharedInstance.existingIndexes()
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
     
     /**
@@ -803,37 +547,19 @@ public struct SwiftData {
     */
     public static func existingIndexesForTable(table: String) -> (result: [String], error: Int?) {
         
-        //create the result and error variables
         var result = [String] ()
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //execute the statement
             (result, error) = SQLiteDB.sharedInstance.existingIndexesForTable(table)
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return (result, error)
+        
     }
     
     
@@ -855,26 +581,17 @@ public struct SwiftData {
     */
     public static func transaction(transactionClosure: ()->Bool) -> Int? {
         
-        //create the error variable
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //begin the transaction
             if let err = SQLiteDB.sharedInstance.beginTransaction() {
                 SQLiteDB.sharedInstance.close()
                 error = err
                 return
             }
-        
-            //execute the transaction closure
             if transactionClosure() {
                 if let err = SQLiteDB.sharedInstance.commitTransaction() {
                     error = err
@@ -884,22 +601,11 @@ public struct SwiftData {
                     error = err
                 }
             }
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -918,27 +624,18 @@ public struct SwiftData {
     :returns:                 An Int with the error code, or nil if there was no error releasing or rolling back the savepoint
     */
     public static func savepoint(savepointClosure: ()->Bool) -> Int? {
-        
-        //create the error variable
+
         var error: Int? = nil
-
-        //create task closure
         let task: ()->Void = {
-
-            //open database connection
             if let err = SQLiteDB.sharedInstance.open() {
                 error = err
                 return
             }
-        
-            //begin the savepoint
             if let err = SQLiteDB.sharedInstance.beginSavepoint() {
                 SQLiteDB.sharedInstance.close()
                 error = err
                 return
             }
-        
-            //execute the savepoint closure
             if savepointClosure() {
                 if let err = SQLiteDB.sharedInstance.releaseSavepoint() {
                     error = err
@@ -955,22 +652,11 @@ public struct SwiftData {
                     error = err
                 }
             }
-        
-            //close the database connection
             SQLiteDB.sharedInstance.close()
-
         }
-        
-        //execute the task on the current thread if in a transaction, savepoint, or closure. Otherwise, add the task to the database queue
-        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
-            task()
-        } else {
-            dispatch_sync(SQLiteDB.sharedInstance.queue) {
-                task()
-            }
-        }
-        
+        putOnThread(task)
         return error
+        
     }
     
     /**
@@ -984,24 +670,19 @@ public struct SwiftData {
         
         let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
         let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
-
         if !NSFileManager.defaultManager().fileExistsAtPath(imageDirPath) {
             if !NSFileManager.defaultManager().createDirectoryAtPath(imageDirPath, withIntermediateDirectories: false, attributes: nil, error: nil) {
                 println("Error creating SwiftData image folder")
                 return nil
             }
         }
-        
         let imageID = NSUUID().UUIDString
-
         let imagePath = imageDirPath.stringByAppendingPathComponent(imageID)
-
         let imageAsData = UIImagePNGRepresentation(image)
         if !imageAsData.writeToFile(imagePath, atomically: true) {
             println("Error saving image")
             return nil
         }
-        
         return imageID
     
     }
@@ -1018,7 +699,6 @@ public struct SwiftData {
         let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
         let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
         let fullPath = imageDirPath.stringByAppendingPathComponent(id)
-        
         return NSFileManager.defaultManager().removeItemAtPath(fullPath, error: nil)
         
     }
@@ -1028,15 +708,12 @@ public struct SwiftData {
     
     private class SQLiteDB {
         
-        //create a single instance of SQLiteDB
         class var sharedInstance: SQLiteDB {
             struct Singleton {
                 static let instance = SQLiteDB()
             }
             return Singleton.instance
         }
-        
-        //declare SQLiteDB properties
         var sqliteDB: COpaquePointer = nil
         var dbPath = SQLiteDB.createPath()
         var inTransaction = false
@@ -1050,18 +727,13 @@ public struct SwiftData {
         
         //open a connection to the sqlite3 database
         func open() -> Int? {
-            
-            //check if in a transaction
+
             if inTransaction || openWithFlags || savepointsOpen > 0 {
                 return nil
             }
-            
-            //check if connection is already open
             if sqliteDB != nil || isConnected {
                 return nil
             }
-            
-            //open connection
             let status = sqlite3_open(dbPath.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB)
             if status != SQLITE_OK {
                 println("SwiftData Error -> During: Opening Database")
@@ -1071,44 +743,34 @@ public struct SwiftData {
                 }
                 return Int(status)
             }
-            
             isConnected = true
-            
             return nil
+            
         }
         
         //open a connection to the sqlite3 database with flags
         func openWithFlags(flags: Int32) -> Int? {
             
-            //check if in transaction
             if inTransaction {
                 println("SwiftData Error -> During: Opening Database with Flags")
                 println("                -> Code: 302 - Cannot open a custom connection inside a transaction")
                 return 302
             }
-            
-            //check if already openWithFlags
             if openWithFlags {
                 println("SwiftData Error -> During: Opening Database with Flags")
                 println("                -> Code: 301 - A custom connection is already open")
                 return 301
             }
-            
-            //check if in savepoint
             if savepointsOpen > 0 {
                 println("SwiftData Error -> During: Opening Database with Flags")
                 println("                -> Code: 303 - Cannot open a custom connection inside a savepoint")
                 return 303
             }
-            
-            //check if already opened
             if isConnected {
                 println("SwiftData Error -> During: Opening Database with Flags")
                 println("                -> Code: 301 - A custom connection is already open")
                 return 301
             }
-            
-            //open the connection
             let status = sqlite3_open_v2(dbPath.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB, flags, nil)
             if status != SQLITE_OK {
                 println("SwiftData Error -> During: Opening Database with Flags")
@@ -1118,27 +780,21 @@ public struct SwiftData {
                 }
                 return Int(status)
             }
-            
             isConnected = true
             openWithFlags = true
-            
             return nil
+            
         }
         
         //close the connection to to the sqlite3 database
         func close() {
-            
-            //check if in transaction
+
             if inTransaction || openWithFlags || savepointsOpen > 0 {
                 return
             }
-            
-            //check if connection is already closed
             if sqliteDB == nil || !isConnected {
                 return
             }
-            
-            //close connection
             let status = sqlite3_close(sqliteDB)
             if status != SQLITE_OK {
                 println("SwiftData Error -> During: Closing Database")
@@ -1147,42 +803,33 @@ public struct SwiftData {
                     println("                -> Details: \(errMsg)")
                 }
             }
-            
             sqliteDB = nil
             isConnected = false
+            
         }
         
         //close a custom connection to the sqlite3 database 
         func closeCustomConnection() -> Int? {
             
-            //check if in trasaction
             if inTransaction {
                 println("SwiftData Error -> During: Closing Database with Flags")
                 println("                -> Code: 305 - Cannot close a custom connection inside a transaction")
                 return 305
             }
-            
-            //check if in savepoint
             if savepointsOpen > 0 {
                 println("SwiftData Error -> During: Closing Database with Flags")
                 println("                -> Code: 306 - Cannot close a custom connection inside a savepoint")
                 return 306
             }
-            
-            //check if no custom connectino open
             if !openWithFlags {
                 println("SwiftData Error -> During: Closing Database with Flags")
                 println("                -> Code: 304 - A custom connection is not currently open")
                 return 304
             }
-            
-            //close connection
             let status = sqlite3_close(sqliteDB)
-
             sqliteDB = nil
             isConnected = false
             openWithFlags = false
-
             if status != SQLITE_OK {
                 println("SwiftData Error -> During: Closing Database with Flags")
                 println("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
@@ -1191,8 +838,8 @@ public struct SwiftData {
                 }
                 return Int(status)
             }
-            
             return nil
+            
         }
         
         //create the database path
@@ -1201,8 +848,8 @@ public struct SwiftData {
             let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
             let databaseStr = "SwiftData.sqlite"
             let dbPath = docsPath.stringByAppendingPathComponent(databaseStr)
-            
             return dbPath
+            
         }
         
         //begin a transaction
@@ -1213,19 +860,15 @@ public struct SwiftData {
                 println("                -> Code: 501 - Cannot begin a transaction within a savepoint")
                 return 501
             }
-
             if inTransaction {
                 println("SwiftData Error -> During: Beginning Transaction")
                 println("                -> Code: 502 - Cannot begin a transaction within another transaction")
                 return 502
             }
-            
             if let error = executeChange("BEGIN EXCLUSIVE") {
                 return error
             }
-            
             inTransaction = true
-            
             return nil
             
         }
@@ -1234,25 +877,22 @@ public struct SwiftData {
         func rollbackTransaction() -> Int? {
             
             let error = executeChange("ROLLBACK")
-            
             inTransaction = false
-            
             return error
+            
         }
         
         //commit a transaction
         func commitTransaction() -> Int? {
             
             let error = executeChange("COMMIT")
-            
             inTransaction = false
-            
             if let err = error {
                 rollbackTransaction()
                 return err
             }
-            
             return nil
+            
         }
         
         //begin a savepoint
@@ -1261,15 +901,13 @@ public struct SwiftData {
             if let error = executeChange("SAVEPOINT 'savepoint\(savepointsOpen + 1)'") {
                 return error
             }
-
             ++savepointsOpen
-            
             return nil
+            
         }
         
         //rollback a savepoint
         func rollbackSavepoint() -> Int? {
-            
             return executeChange("ROLLBACK TO 'savepoint\(savepointsOpen)'")
         }
         
@@ -1277,10 +915,9 @@ public struct SwiftData {
         func releaseSavepoint() -> Int? {
             
             let error = executeChange("RELEASE 'savepoint\(savepointsOpen)'")
-            
             --savepointsOpen
-            
             return error
+            
         }
         
         //get last inserted row id
@@ -1291,7 +928,6 @@ public struct SwiftData {
         
         //number of rows changed by last update
         func numberOfRowsModified() -> Int {
-            
             return Int(sqlite3_changes(sqliteDB))
         }
         
@@ -1355,7 +991,6 @@ public struct SwiftData {
                     sql = result.string
                 }
             }
-            
             var pStmt: COpaquePointer = nil
             var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
             if status != SQLITE_OK {
@@ -1367,7 +1002,6 @@ public struct SwiftData {
                 sqlite3_finalize(pStmt)
                 return Int(status)
             }
-            
             status = sqlite3_step(pStmt)
             if status != SQLITE_DONE && status != SQLITE_OK {
                 println("SwiftData Error -> During: SQL Step")
@@ -1378,17 +1012,15 @@ public struct SwiftData {
                 sqlite3_finalize(pStmt)
                 return Int(status)
             }
-            
             sqlite3_finalize(pStmt)
-            
             return nil
+            
         }
         
         //execute a SQLite query from a SQL String
         func executeQuery(sqlStr: String, withArgs: [AnyObject]? = nil) -> (result: [SDRow], error: Int?) {
             
             var resultSet = [SDRow]()
-                
             var sql = sqlStr
             if let args = withArgs {
                 let result = bind(args, toSQL: sql)
@@ -1398,7 +1030,6 @@ public struct SwiftData {
                     sql = result.string
                 }
             }
-            
             var pStmt: COpaquePointer = nil
             var status = sqlite3_prepare_v2(SQLiteDB.sharedInstance.sqliteDB, sql, -1, &pStmt, nil)
             if status != SQLITE_OK {
@@ -1410,7 +1041,6 @@ public struct SwiftData {
                 sqlite3_finalize(pStmt)
                 return (resultSet, Int(status))
             }
-            
             var columnCount: Int32 = 0
             var next = true
             while next {
@@ -1427,15 +1057,17 @@ public struct SwiftData {
                         } else {
                             var columnType = ""
                             switch sqlite3_column_type(pStmt, i) {
-                            case 1:
+                            case SQLITE_INTEGER:
                                 columnType = "INTEGER"
-                            case 2:
+                            case SQLITE_FLOAT:
                                 columnType = "FLOAT"
-                            case 3:
+                            case SQLITE_TEXT:
                                 columnType = "TEXT"
-                            case 4:
+                            case SQLITE3_TEXT:
+                                columnType = "TEXT"
+                            case SQLITE_BLOB:
                                 columnType = "BLOB"
-                            case 5:
+                            case SQLITE_NULL:
                                 columnType = "NULL"
                             default:
                                 columnType = "NULL"
@@ -1457,12 +1089,10 @@ public struct SwiftData {
                     sqlite3_finalize(pStmt)
                     return (resultSet, Int(status))
                 }
-                    
             }
-                
             sqlite3_finalize(pStmt)
-            
             return (resultSet, nil)
+            
         }
         
     }
@@ -1471,11 +1101,8 @@ public struct SwiftData {
     // MARK: - SDRow
     
     public struct SDRow {
-        
-        //declare properties
+
         var values = [String: SDColumn]()
-        
-        //subscript
         public subscript(key: String) -> SDColumn? {
             get {
                 return values[key]
@@ -1492,10 +1119,7 @@ public struct SwiftData {
     
     public struct SDColumn {
         
-        //declare property
         var value: AnyObject
-        
-        //initialization
         init(obj: AnyObject) {
             value = obj
         }
@@ -1571,6 +1195,7 @@ public struct SwiftData {
         :returns:  An Optional UIImage corresponding to the path of the apprioriate column value. Will be nil if: the column name does not exist, the value of the specified path cannot be cast as a UIImage, or the value is NULL
         */
         public func asUIImage() -> UIImage? {
+            
             if let path = value as? String{
                 let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
                 let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
@@ -1579,12 +1204,12 @@ public struct SwiftData {
                     println("SwiftData Error -> Invalid image ID provided")
                     return nil
                 }
-                let imageAsData = NSData(contentsOfFile: fullPath)
-                if let imageAsData = imageAsData {
+                if let imageAsData = NSData(contentsOfFile: fullPath) {
                     return UIImage(data: imageAsData)
                 }
             }
             return nil
+            
         }
 
     }
@@ -1599,11 +1224,27 @@ public struct SwiftData {
 }
 
 
+// MARK: - Threading
+
+extension SwiftData {
+    
+    private static func putOnThread(task: ()->Void) {
+        if SQLiteDB.sharedInstance.inTransaction || SQLiteDB.sharedInstance.savepointsOpen > 0 || SQLiteDB.sharedInstance.openWithFlags {
+            task()
+        } else {
+            dispatch_sync(SQLiteDB.sharedInstance.queue) {
+                task()
+            }
+        }
+    }
+    
+}
+
+
 // MARK: - Escaping And Binding Functions
 
 extension SwiftData.SQLiteDB {
-    
-    //bind object
+
     func bind(objects: [AnyObject], toSQL sql: String) -> (string: String, error: Int?) {
 
         var newSql = ""
@@ -1640,29 +1281,25 @@ extension SwiftData.SQLiteDB {
                 i = false
             }
         }
-        
         if bindIndex != objects.count {
             println("SwiftData Error -> During: Object Binding")
             println("                -> Code: 202 - Too many objects to bind provided")
             return ("", 202)
         }
-        
         return (newSql, nil)
+        
     }
     
     //return escaped String value of AnyObject
     func escapeValue(obj: AnyObject?) -> String {
         
         if let obj: AnyObject = obj {
-            
             if obj is String {
                 return "'\(escapeStringValue(obj as String))'"
             }
-            
             if obj is Double || obj is Int {
                 return "\(obj)"
             }
-            
             if obj is Bool {
                 if obj as Bool {
                     return "1"
@@ -1670,7 +1307,6 @@ extension SwiftData.SQLiteDB {
                     return "0"
                 }
             }
-            
             if obj is NSData {
                 let str = "\(obj)"
                 var newStr = ""
@@ -1679,16 +1315,13 @@ extension SwiftData.SQLiteDB {
                         newStr.append(char)
                     }
                 }
-                
                 return "X'\(newStr)'"
             }
-            
             if obj is NSDate {
                 let dateFormatter = NSDateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd HH:mm:ss"
                 return "\(escapeValue(dateFormatter.stringFromDate(obj as NSDate)))"
             }
-            
             if obj is UIImage {
                 if let imageID = SD.saveUIImage(obj as UIImage) {
                     return "'\(escapeStringValue(imageID))'"
@@ -1696,10 +1329,8 @@ extension SwiftData.SQLiteDB {
                 println("SwiftData Warning -> Cannot save image, NULL will be inserted into the database")
                 return "NULL"
             }
-            
             println("SwiftData Warning -> Object \"\(obj)\" is not a supported type and will be inserted into the database as NULL")
             return "NULL"
-            
         } else {
             return "NULL"
         }
@@ -1708,9 +1339,7 @@ extension SwiftData.SQLiteDB {
     
     //return escaped String identifier
     func escapeIdentifier(obj: String) -> String {
-        
         return "\"\(escapeStringIdentifier(obj))\""
-        
     }
 
     
@@ -1723,7 +1352,6 @@ extension SwiftData.SQLiteDB {
             }
             escapedStr.append(char)
         }
-        
         return escapedStr
     }
     
@@ -1736,7 +1364,6 @@ extension SwiftData.SQLiteDB {
             }
             escapedStr.append(char)
         }
-        
         return escapedStr
     }
     
@@ -1771,7 +1398,6 @@ extension SwiftData {
         private func toSQL() -> String {
             
             switch self {
-                
             case .StringVal, .UIImageVal:
                 return "TEXT"
             case .IntVal:
@@ -1824,8 +1450,7 @@ extension SwiftData.SQLiteDB {
     
     //create a table
     func createSQLTable(table: String, withColumnsAndTypes values: [String: SwiftData.DataType]) -> Int? {
-        
-        //form the SQLite string for creation of the actual table
+
         var sqlStr = "CREATE TABLE \(table) (ID INTEGER PRIMARY KEY AUTOINCREMENT, "
         var firstRun = true
         for value in values {
@@ -1837,18 +1462,13 @@ extension SwiftData.SQLiteDB {
             }
         }
         sqlStr += ")"
-        
-        //execute update to create new table
         return executeChange(sqlStr)
+        
     }
     
     //delete a table
     func deleteSQLTable(table: String) -> Int? {
-        
-        //form the SQLite string for deletion of the table
         let sqlStr = "DROP TABLE \(table)"
-        
-        //execute update to delete table
         return executeChange(sqlStr)
     }
     
@@ -1869,7 +1489,6 @@ extension SwiftData.SQLiteDB {
                 return (tableArr, 403)
             }
         }
-
         return (tableArr, nil)
     }
     
@@ -1881,7 +1500,6 @@ extension SwiftData.SQLiteDB {
             println("                -> Code: 401 - At least one column name must be provided")
             return 401
         }
-        
         var sqlStr = ""
         if unique {
             sqlStr = "CREATE UNIQUE INDEX \(name) ON \(table) ("
@@ -1898,15 +1516,13 @@ extension SwiftData.SQLiteDB {
             }
         }
         sqlStr += ")"
-        
         return executeChange(sqlStr)
+        
     }
     
     //remove an index
     func removeIndex(name: String) -> Int? {
-        
         let sqlStr = "DROP INDEX \(name)"
-        
         return executeChange(sqlStr)
     }
     
@@ -1914,7 +1530,6 @@ extension SwiftData.SQLiteDB {
     func existingIndexes() -> (result: [String], error: Int?) {
         
         let sqlStr = "SELECT name FROM sqlite_master WHERE type = 'index'"
-        
         var indexArr = [String]()
         let results = executeQuery(sqlStr)
         if let err = results.error {
@@ -1931,13 +1546,13 @@ extension SwiftData.SQLiteDB {
             }
         }
         return (indexArr, nil)
+        
     }
     
     //obtain list of existing indexes for a specific table
     func existingIndexesForTable(table: String) -> (result: [String], error: Int?) {
         
         let sqlStr = "SELECT name FROM sqlite_master WHERE type = 'index' AND tbl_name = '\(table)'"
-        
         var indexArr = [String]()
         let results = executeQuery(sqlStr)
         if let err = results.error {
@@ -1953,6 +1568,7 @@ extension SwiftData.SQLiteDB {
             }
         }
         return (indexArr, nil)
+        
     }
     
 }
