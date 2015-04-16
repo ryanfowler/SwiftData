@@ -337,7 +337,36 @@ public struct SwiftData {
         return error
         
     }
-    
+	
+	/**
+	Adds Provided Column Names and Types to specified Table name
+	
+	Possible errors returned by this function are:
+	
+	- SQLite errors (0 - 101)
+	
+	:param:  table                The table name to be altered
+	:param:  columnNamesAndTypes  A dictionary where the key = column name, and the value = data type
+	
+	:returns:                     An Int with the error code, or nil if there was no error
+	*/
+	
+	public static func addColumns(table: String, columnNamesAndTypes values: [String: SwiftData.DataType]) -> Int? {
+		
+		var error: Int? = nil
+		let task: ()->Void = {
+			if let err = SQLiteDB.sharedInstance.open() {
+				error = err
+				return
+			}
+			error = SQLiteDB.sharedInstance.addColumns(table, columnsAndTypes: values)
+			SQLiteDB.sharedInstance.close()
+		}
+		putOnThread(task)
+		return error
+		
+	}
+
     /**
     Obtain a list of the existing SQLite table names
 
@@ -1471,7 +1500,22 @@ extension SwiftData.SQLiteDB {
         let sqlStr = "DROP TABLE \(table)"
         return executeChange(sqlStr)
     }
-    
+	
+	//alter a table
+	func addColumns(table: String, columnsAndTypes values: [String: SwiftData.DataType]) -> Int? {
+		var result: Int?
+		for colDef in values {
+			var sqlStr = "ALTER TABLE \(table) ADD COLUMN \(escapeIdentifier(colDef.0)) \(colDef.1.toSQL())"
+			
+			result = executeChange(sqlStr)
+			if result != nil {
+				return result
+			}
+		}
+		
+		return result
+	}
+		
     //get existing table names
     func existingTables() -> (result: [String], error: Int?) {
         let sqlStr = "SELECT name FROM sqlite_master WHERE type = 'table'"
