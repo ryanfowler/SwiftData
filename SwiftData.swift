@@ -939,7 +939,7 @@ public struct SwiftData {
                 if sqlite3_column_type(statement, index) == SQLITE_NULL {
                     return nil
                 }
-                return Int(sqlite3_column_int(statement, index))
+                return Int(sqlite3_column_int64(statement, index))
             case "CHARACTER(20)", "VARCHAR(255)", "VARYING CHARACTER(255)", "NCHAR(55)", "NATIVE CHARACTER", "NVARCHAR(100)", "TEXT", "CLOB":
                 let text = UnsafePointer<Int8>(sqlite3_column_text(statement, index))
                 return String.fromCString(text)
