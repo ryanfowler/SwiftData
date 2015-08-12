@@ -939,7 +939,7 @@ public struct SwiftData {
                 if sqlite3_column_type(statement, index) == SQLITE_NULL {
                     return nil
                 }
-                return Int(sqlite3_column_int64(statement, index))
+                return NSNumber(longLong: sqlite3_column_int64(statement, index))
             case "CHARACTER(20)", "VARCHAR(255)", "VARYING CHARACTER(255)", "NCHAR(55)", "NATIVE CHARACTER", "NVARCHAR(100)", "TEXT", "CLOB":
                 let text = UnsafePointer<Int8>(sqlite3_column_text(statement, index))
                 return String.fromCString(text)
@@ -1141,7 +1141,22 @@ public struct SwiftData {
         :returns:  An Optional Int corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as a Int, or the value is NULL
         */
         public func asInt() -> Int? {
-            return value as? Int
+            if let num = value as? NSNumber {
+                return num.longValue
+            }
+            return nil
+        }
+        
+        /**
+        Return the column value as an Int64
+
+        :returns:  An Optional Int64 corresponding to the apprioriate column value. Will be nil if: the column name does not exist, the value cannot be cast as a Int64, or the value is NULL
+        */
+        public func asInt64() -> Int64? {
+            if let num = value as? NSNumber {
+                return num.longLongValue
+            }
+            return nil
         }
 
         /**
