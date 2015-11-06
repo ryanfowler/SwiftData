@@ -386,7 +386,7 @@ public struct SwiftData {
     - returns:  The path to the SwiftData database
     */
     public static func databasePath() -> String {
-        return SQLiteDB.sharedInstance.dbPath
+        return SQLiteDB.sharedInstance.dbPath!
     }
     
     /**
@@ -668,21 +668,27 @@ public struct SwiftData {
     */
     public static func saveUIImage(image: UIImage) -> String? {
         
-        let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
-        let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
-        if !NSFileManager.defaultManager().fileExistsAtPath(imageDirPath) {
-            if !NSFileManager.defaultManager().createDirectoryAtPath(imageDirPath, withIntermediateDirectories: false, attributes: nil, error: nil) {
-                print("Error creating SwiftData image folder")
-                return nil
-            }
+        //////////
+        let documentsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0])
+        let imageDirPath = documentsPath.URLByAppendingPathComponent("SwiftDataImages")
+
+        
+        do {
+            try NSFileManager.defaultManager().createDirectoryAtPath(imageDirPath.path!, withIntermediateDirectories: true, attributes: nil)
+        } catch let error as NSError {
+            NSLog("Unable to create directory \(error.debugDescription)")
         }
+        //////////
+        
+        
         let imageID = NSUUID().UUIDString
-        let imagePath = imageDirPath.stringByAppendingPathComponent(imageID)
+        let imagePath = imageDirPath.URLByAppendingPathComponent(imageID)
         let imageAsData = UIImagePNGRepresentation(image)
-        if !imageAsData.writeToFile(imagePath, atomically: true) {
+        if !imageAsData!.writeToURL(imagePath, atomically: true){
             print("Error saving image")
             return nil
         }
+        
         return imageID
     
     }
@@ -694,12 +700,19 @@ public struct SwiftData {
     
     - returns:   True if the image was successfully deleted, or false if there was an error during the deletion
     */
-    public static func deleteUIImageWithID(id: String) -> Bool {
+    public static func deleteUIImageWithID(id: String)  {
         
-        let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
-        let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
-        let fullPath = imageDirPath.stringByAppendingPathComponent(id)
-        return NSFileManager.defaultManager().removeItemAtPath(fullPath, error: nil)
+        let docsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0])
+        let imageDirPath = docsPath.URLByAppendingPathComponent("SwiftDataImages")
+        let fullPath = imageDirPath.URLByAppendingPathComponent(id)
+        
+        do {
+            return try NSFileManager.defaultManager().removeItemAtURL(fullPath)
+        } catch let error as NSError {
+            NSLog("Unable to create directory \(error.debugDescription)")
+        }
+        
+        
         
     }
     
@@ -715,7 +728,7 @@ public struct SwiftData {
             return Singleton.instance
         }
         var sqliteDB: COpaquePointer = nil
-        var dbPath = SQLiteDB.createPath()
+        var dbPath = SQLiteDB.createPath().path
         var inTransaction = false
         var isConnected = false
         var openWithFlags = false
@@ -734,7 +747,7 @@ public struct SwiftData {
             if sqliteDB != nil || isConnected {
                 return nil
             }
-            let status = sqlite3_open(dbPath.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB)
+            let status = sqlite3_open(dbPath!.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB)
             if status != SQLITE_OK {
                 print("SwiftData Error -> During: Opening Database")
                 print("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
@@ -771,7 +784,7 @@ public struct SwiftData {
                 print("                -> Code: 301 - A custom connection is already open")
                 return 301
             }
-            let status = sqlite3_open_v2(dbPath.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB, flags, nil)
+            let status = sqlite3_open_v2(dbPath!.cStringUsingEncoding(NSUTF8StringEncoding)!, &sqliteDB, flags, nil)
             if status != SQLITE_OK {
                 print("SwiftData Error -> During: Opening Database with Flags")
                 print("                -> Code: \(status) - " + SDError.errorMessageFromCode(Int(status)))
@@ -843,11 +856,11 @@ public struct SwiftData {
         }
         
         //create the database path
-        class func createPath() -> String {
+        class func createPath() -> NSURL {
             
-            let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
+            let docsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0])
             let databaseStr = "SwiftData.sqlite"
-            let dbPath = docsPath.stringByAppendingPathComponent(databaseStr)
+            let dbPath = docsPath.URLByAppendingPathComponent(databaseStr)
             return dbPath
             
         }
@@ -1197,14 +1210,20 @@ public struct SwiftData {
         public func asUIImage() -> UIImage? {
             
             if let path = value as? String{
-                let docsPath = NSSearchPathForDirectoriesInDomains(NSSearchPathDirectory.DocumentDirectory, NSSearchPathDomainMask.UserDomainMask, true)[0] as String
-                let imageDirPath = docsPath.stringByAppendingPathComponent("SwiftDataImages")
-                let fullPath = imageDirPath.stringByAppendingPathComponent(path)
-                if !NSFileManager.defaultManager().fileExistsAtPath(fullPath) {
-                    print("SwiftData Error -> Invalid image ID provided")
-                    return nil
+                let docsPath = NSURL(fileURLWithPath: NSSearchPathForDirectoriesInDomains(.DocumentDirectory, .UserDomainMask, true)[0])
+                let imageDirPath = docsPath.URLByAppendingPathComponent("SwiftDataImages")
+                let fullPath = imageDirPath.URLByAppendingPathComponent(path)
+                
+                do {
+                     if !NSFileManager.defaultManager().fileExistsAtPath(fullPath.path!){
+                        print("SwiftData Error -> Invalid image ID provided")
+                        return nil
+                    }
                 }
-                if let imageAsData = NSData(contentsOfFile: fullPath) {
+                
+                
+                
+                if let imageAsData = NSData(contentsOfFile: fullPath.path!) {
                     return UIImage(data: imageAsData)
                 }
             }
