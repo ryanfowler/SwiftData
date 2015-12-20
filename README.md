@@ -21,7 +21,7 @@ SwiftData is a simple and effective wrapper around the SQLite3 C API written com
 ##Installation
 
 Currently, it's as easy as adding the file 'SwiftData.swift' as a git submodule, and dragging it into your project.
-Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added `#import "sqlite3.h"` to your Briding-Header.h file.
+Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added `#import "sqlite3.h"` to your Bridging-Header.h file.
 
 
 ##System Requirements
