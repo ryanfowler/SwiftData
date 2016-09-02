@@ -602,7 +602,7 @@ public struct SwiftData {
             } else {
                 if let err = SQLiteDB.sharedInstance.rollbackSavepoint() {
                     print("Error rolling back to savepoint")
-                    --SQLiteDB.sharedInstance.savepointsOpen
+                    SQLiteDB.sharedInstance.savepointsOpen -= 1
                     SQLiteDB.sharedInstance.close()
                     error = err
                     return
@@ -885,7 +885,7 @@ public struct SwiftData {
             if let error = executeChange("SAVEPOINT 'savepoint\(savepointsOpen + 1)'") {
                 return error
             }
-            ++savepointsOpen
+            savepointsOpen += 1
             return nil
             
         }
@@ -899,7 +899,7 @@ public struct SwiftData {
         func releaseSavepoint() -> Int? {
             
             let error = executeChange("RELEASE 'savepoint\(savepointsOpen)'")
-            --savepointsOpen
+            savepointsOpen -= 1
             return error
             
         }
@@ -1032,7 +1032,7 @@ public struct SwiftData {
                 if status == SQLITE_ROW {
                     columnCount = sqlite3_column_count(pStmt)
                     var row = SDRow()
-                    for var i: Int32 = 0; i < columnCount; ++i {
+                    for i: Int32 in 0 ..< columnCount {
                         let columnName = String.fromCString(sqlite3_column_name(pStmt, i))!
                         if let columnType = String.fromCString(sqlite3_column_decltype(pStmt, i))?.uppercaseString {
                             if let columnValue: AnyObject = getColumnValue(pStmt, index: i, type: columnType) {
@@ -1247,7 +1247,7 @@ extension SwiftData.SQLiteDB {
                     obj = escapeValue(objects[bindIndex])
                 }
                 newSql += obj
-                ++bindIndex
+                bindIndex += 1
             } else {
                 newSql.append(char)
             }
