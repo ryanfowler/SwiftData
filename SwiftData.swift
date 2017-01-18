@@ -872,7 +872,7 @@ public struct SwiftData {
             let error = executeChange("COMMIT")
             inTransaction = false
             if let err = error {
-                rollbackTransaction()
+             _ =   rollbackTransaction()
                 return err
             }
             return nil
