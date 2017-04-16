@@ -6,7 +6,7 @@ Working with SQLite is a pain in Swift - that's where SwiftData comes in.
 SwiftData is a simple and effective wrapper around the SQLite3 C API written completely in Swift.
 
 
-##Features
+## Features
 
 - Execute SQL statements directly
 - Bind objects conveniently to a string of SQL
@@ -18,13 +18,13 @@ SwiftData is a simple and effective wrapper around the SQLite3 C API written com
 - Database connection operations (opening/closing) are automatically handled
 
 
-##Installation
+## Installation
 
 Currently, it's as easy as adding the file 'SwiftData.swift' as a git submodule, and dragging it into your project.
 Ensure that you've added 'libsqlite3.dylib' as a linked framework and that you've added `#import "sqlite3.h"` to your Briding-Header.h file.
 
 
-##System Requirements
+## System Requirements
 
 Xcode Version:
 
@@ -36,14 +36,14 @@ Can be used in applications with operating systems:
 - Mac OS X 10.9+
 
 
-##Usage
+## Usage
 
 This section runs through some sample usage of SwiftData.
 
 The full API documentation can be found [here](http://ryanfowler.github.io/SwiftData)
 
 
-###Table Creation
+### Table Creation
 
 By default, SwiftData creates and uses a database called 'SwiftData.sqlite' in the 'Documents' folder of the application.
 
@@ -72,7 +72,7 @@ Alternatively, a table could be created using a SQL statement directly, as shown
 
 
 =================
-###Execute A Change
+### Execute A Change
 
 The `SD.executeChange()` function can be used to execute any non-query SQL statement (e.g. INSERT, UPDATE, DELETE, CREATE, etc.).
 
@@ -98,7 +98,7 @@ if let err = SD.executeChange("INSERT INTO Cities (Name, Population, IsWarm, Fou
 }
 ```
 
-#####Binding Values
+##### Binding Values
 
 Alternatively, we could insert a row with object binding:
 
@@ -137,7 +137,7 @@ The objects are escaped and will bind to a SQL string in the following manner:
 
 All other object types will bind to the SQL string as 'NULL', and a warning message will be printed to the console.
 
-#####Binding Identifiers
+##### Binding Identifiers
 
 If an identifier (e.g. table or column name) is provided by the user and needs to be escaped, you can use the characters 'i?' to bind the objects like so:
 
@@ -162,7 +162,7 @@ Objects provided to bind as identifiers must be of type String.
 
 
 ====================
-###Execute A Query
+### Execute A Query
 
 Now that our table has some data, we can query it:
 
@@ -254,7 +254,7 @@ The same binding rules apply as described in the 'Execute a Change' section.
 
 
 =================
-###Error Handling
+### Error Handling
 
 You have probably noticed that almost all SwiftData functions return an 'error' value.
 
@@ -270,7 +270,7 @@ By default, error and warning messages are printed to the console when they are 
 
 
 =================
-###Creating An Index
+### Creating An Index
 
 To create an index, you may use the provided convenience function:
 
@@ -298,7 +298,7 @@ let (indexes, err) = existingIndexesForTable("TableName")
 
 
 =================
-###Custom Connection
+### Custom Connection
 
 You may create a custom connection to the database and execute a number of functions within a provided closure.
 An example of this can be seen below:
@@ -332,7 +332,7 @@ For more information, see the SQLite documentation for [opening a new database c
 
 
 =================
-###Transactions and Savepoints
+### Transactions and Savepoints
 
 If we wanted to execute the above closure `task: ()->Void` inside an exclusive transaction, it could be done like so:
 
@@ -361,7 +361,7 @@ For more information, see the SQLite documentation for [transactions](http://sql
 
 
 =================
-###Using UIImages
+### Using UIImages
 
 Convenience functions are provided for working with UIImages.
 
@@ -424,24 +424,24 @@ Removing the row containing the image ID from the database does not delete the i
 
 
 =================
-###Thread Safety
+### Thread Safety
 
 All SwiftData operations are placed on a custom serial queue and executed in a FIFO order.
 
 This means that you can access the SQLite database from multiple threads without the need to worry about causing errors.
 
 
-##API Documentation
+## API Documentation
 
 Full API Documentation can be found [here](http://ryanfowler.github.io/SwiftData)
 
 
-##Contact
+## Contact
 
 Please open an issue for any comments, concerns, ideas, or potential pull requests - all welcome :)
 
 
-##License
+## License
 
 SwiftData is released under the MIT License.
 
