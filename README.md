@@ -1,6 +1,10 @@
 SwiftData
 =========
 
+For those who need it to be built on Xcode 8.3+, please use the swift3 branch:
+
+This is a toolkit that is required by cordova-geofence plugin, I need it to be compiled on Xcode 8.3, so need it to upgrade to swift 3 support. Please use the swift 3 branch when you need it too.
+
 Working with SQLite is a pain in Swift - that's where SwiftData comes in.
 
 SwiftData is a simple and effective wrapper around the SQLite3 C API written completely in Swift.
